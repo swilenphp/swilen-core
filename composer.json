@@ -1,0 +1,18 @@
+{
+    "name": "alex/fluxpress",
+    "description": "FluxPress is an experimental next-generation WordPress runtime designed to be async, headless-first, and significantly faster, while maintaining compatibility with existing WordPress plugins through a legacy adapter layer.",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Alex\\Fluxpress\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Zweiter",
+            "email": "asegundo442@gmail.com"
+        }
+    ],
+    "require": {}
+}

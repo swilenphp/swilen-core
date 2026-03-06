@@ -1,0 +1,60 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Composer
+/vendor/
+/composer.lock
+
+# Node
+node_modules/
+dist/
+build/
+.cache/
+
+# Runtime
+/tmp/
+/runtime/
+/storage/
+
+# Coverage
+coverage/
+*.lcov
+
+# Testing
+/phpunit.result.cache
+
+# FluxPress cache
+/cache/
+/bootstrap/cache/
+
+# WordPress-style content folders (optional if used)
+wp-content/uploads/
+wp-content/cache/
+
+# Swoole
+*.pid
+*.sock
+
+# Misc
+*.bak
+*.tmp
