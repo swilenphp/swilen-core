@@ -1,12 +1,16 @@
 {
-    "name": "alex/fluxpress",
-    "description": "FluxPress is an experimental next-generation WordPress runtime designed to be async, headless-first, and significantly faster, while maintaining compatibility with existing WordPress plugins through a legacy adapter layer.",
+    "name": "alex/swilen",
+    "description": "Swilen is an experimental next-generation WordPress runtime designed to be async, headless-first, and significantly faster, while maintaining compatibility with existing WordPress plugins through a legacy adapter layer.",
     "type": "project",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Alex\\Fluxpress\\": "src/"
-        }
+            "Swilen\\": "src"
+        },
+        "files": [
+            "src/Arthropod/helpers.php",
+            "src/Shared/functions.php"
+        ]
     },
     "authors": [
         {
@@ -14,5 +18,43 @@
             "email": "asegundo442@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "php": ">=8.2",
+        "ext-mbstring": "*",
+        "ext-json": "*",
+        "psr/container": "^2.0",
+        "psr/log": "^1.1",
+        "psr/http-message": "^1.0"
+    },
+    "require-dev": {
+        "pestphp/pest": "^1.21",
+        "mockery/mockery": "^1.5"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    },
+    "scripts": {
+        "test": "./vendor/bin/pest",
+        "test:unit": "./vendor/bin/pest --group unit",
+        "test:integration": "./vendor/bin/pest --group integration",
+        "test:e2e": "./vendor/bin/pest --group e2e",
+        "test:coverage": "./vendor/bin/pest --coverage --min=90",
+        "test:coverage:unit": "./vendor/bin/pest --group unit --coverage --min=90",
+        "test:coverage:integration": "./vendor/bin/pest --group integration --coverage --min=90",
+        "test:coverage:e2e": "./vendor/bin/pest --group e2e --coverage --min=90",
+        "test:coverage:unit:integration": "./vendor/bin/pest --group unit,integration --coverage --min=90",
+        "test:coverage:unit:e2e": "./vendor/bin/pest --group unit,e2e --coverage --min=90",
+        "test:coverage:integration:e2e": "./vendor/bin/pest --group integration,e2e --coverage --min=90",
+        "test:coverage:unit:integration:e2e": "./vendor/bin/pest --group unit,integration,e2e --coverage --min=90"
+    },
+    "suggest": {
+        "ext-redis": "For Redis cache support"
+    }
 }

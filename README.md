@@ -1,10 +1,10 @@
-# FluxPress
+# Swilen
 
-FluxPress is an experimental re-architecture of WordPress designed for the modern web.
+Swilen is an experimental re-architecture of WordPress designed for the modern web.
 
 It provides an **async, event-driven runtime** and a **headless-first architecture**, while maintaining compatibility with existing WordPress plugins through a legacy compatibility layer.
 
-The goal of FluxPress is to modernize the WordPress ecosystem without forcing developers, designers, or content creators to abandon the tools they already use.
+The goal of Swilen is to modernize the WordPress ecosystem without forcing developers, designers, or content creators to abandon the tools they already use.
 
 ---
 
@@ -12,7 +12,7 @@ The goal of FluxPress is to modernize the WordPress ecosystem without forcing de
 
 WordPress powers a huge portion of the web, but its architecture was designed for a synchronous PHP environment from the early 2000s.
 
-FluxPress explores what WordPress could look like if it were built today:
+Swilen explores what WordPress could look like if it were built today:
 
 - Async runtime
 - Event-driven architecture
@@ -25,7 +25,8 @@ FluxPress explores what WordPress could look like if it were built today:
 ## Core Principles
 
 ### 1. Headless First
-FluxPress behaves as a headless CMS by default.
+
+Swilen behaves as a headless CMS by default.
 
 Themes are only loaded if they are detected.
 
@@ -33,7 +34,7 @@ Themes are only loaded if they are detected.
 
 Request → API → Content Service → JSON Response
 
-````
+```
 
 Traditional theme rendering remains optional for compatibility.
 
@@ -41,7 +42,7 @@ Traditional theme rendering remains optional for compatibility.
 
 ### 2. Async Runtime
 
-FluxPress runs on an async server runtime (such as Swoole), enabling:
+Swilen runs on an async server runtime (such as Swoole), enabling:
 
 - persistent workers
 - connection pooling
@@ -60,7 +61,7 @@ Example:
 Event::listen(PostPublished::class, function ($post) {
     SearchIndexer::index($post);
 });
-````
+```
 
 ---
 
@@ -68,12 +69,12 @@ Event::listen(PostPublished::class, function ($post) {
 
 Existing WordPress plugins can continue to work using a compatibility adapter.
 
-FluxPress implements the classic WordPress plugin contract:
+Swilen implements the classic WordPress plugin contract:
 
-* `add_action`
-* `add_filter`
-* global APIs
-* common WordPress classes
+- `add_action`
+- `add_filter`
+- global APIs
+- common WordPress classes
 
 This allows many existing plugins to run without modification.
 
@@ -105,7 +106,7 @@ class SeoPlugin implements Plugin
 HTTP Server (Async Runtime)
         │
         ▼
-FluxPress Core
+Swilen Core
         │
  ┌───────────────┬───────────────┐
  │ Modern Plugin │ Legacy Plugin │
@@ -118,20 +119,20 @@ Content / Users / Media Services
 
 ## Goals
 
-* Improve performance and scalability
-* Enable async workloads
-* Provide a modern developer experience
-* Preserve compatibility with the WordPress ecosystem
+- Improve performance and scalability
+- Enable async workloads
+- Provide a modern developer experience
+- Preserve compatibility with the WordPress ecosystem
 
 ## Status
 
-FluxPress is currently an experimental project exploring a modern architecture for WordPress-like systems.
+Swilen is currently an experimental project exploring a modern architecture for WordPress-like systems.
 
 The API and internal design may change frequently.
 
 ## Inspiration
 
-FluxPress is inspired by modern headless CMS platforms and async runtimes while remaining compatible with the WordPress ecosystem.
+Swilen is inspired by modern headless CMS platforms and async runtimes while remaining compatible with the WordPress ecosystem.
 
 ## License
 
