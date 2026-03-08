@@ -22,10 +22,6 @@
 |
 */
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
-
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -88,7 +84,7 @@ function command(string $command)
  */
 function debug_json($value)
 {
-    print_r(PHP_EOL.json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_SLASHES).PHP_EOL);
+    print_r(PHP_EOL . json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_SLASHES) . PHP_EOL);
 }
 
 function getBuffer(\Closure $closure)
@@ -114,5 +110,5 @@ function getBuffer(\Closure $closure)
  */
 function getReadableFileStub()
 {
-    return __DIR__.'/__fixtures__/readablefile.txt';
+    return __DIR__ . '/__fixtures__/readablefile.txt';
 }

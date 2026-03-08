@@ -58,3 +58,4 @@ wp-content/cache/
 # Misc
 *.bak
 *.tmp
+docs/wp/*

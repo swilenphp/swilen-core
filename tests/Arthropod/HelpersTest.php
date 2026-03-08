@@ -47,7 +47,7 @@ it('Response helper is instaceof Routing\ResponsiFactory', function () {
 it('Request helper is instaceof Http\Request', function () {
     $app = new Application();
 
-    $app->instance('request', Request::create());
+    $app->instance('request', Request::capture());
 
     expect(request())->toBeInstanceOf(Request::class);
     expect(request()->getMethod())->toBe('GET');
@@ -62,9 +62,9 @@ it('Work with application paths', function () {
 
     $app->useAppPath('test');
 
-    expect(app_path())->toBe(__DIR__.DIRECTORY_SEPARATOR.'test');
-    expect(storage_path())->toBe(__DIR__.DIRECTORY_SEPARATOR.'test'.DIRECTORY_SEPARATOR.'storage');
-    expect(storage_path('test'))->toBe(__DIR__.DIRECTORY_SEPARATOR.'test'.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'test');
+    expect(app_path())->toBe(__DIR__ . DIRECTORY_SEPARATOR . 'test');
+    expect(storage_path())->toBe(__DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'storage');
+    expect(storage_path('test'))->toBe(__DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'test');
 
     $app->setInstance(null);
 });
@@ -120,6 +120,4 @@ it('Cannot redeclare helper functions', function () {
     expect(tap('Hola', function () {}))->not->toBeTrue();
 });
 
-class MakeClassAppHelperStub
-{
-}
+class MakeClassAppHelperStub {}

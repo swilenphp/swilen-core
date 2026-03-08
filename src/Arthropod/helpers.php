@@ -1,7 +1,10 @@
 <?php
 
+use Swilen\Arthropod\Application;
 use Swilen\Arthropod\Env;
 use Swilen\Container\Container;
+use Swilen\Events\Dispatcher;
+use Swilen\Events\EventDispatcher;
 use Swilen\Routing\Contract\ResponseFactory;
 
 if (!function_exists('app')) {
@@ -16,10 +19,21 @@ if (!function_exists('app')) {
 	function app($abstract = null, array $parameters = [])
 	{
 		if ($abstract === null) {
-			return Container::getInstance();
+			return Application::getInstance();
 		}
 
-		return Container::getInstance()->make($abstract, $parameters);
+		return Application::getInstance()->make($abstract, $parameters);
+	}
+}
+
+if (!function_exists("dispatcher")) {
+	/**
+	 *
+	 * @return Swilen\Events\Dispatcher
+	 */
+	function dispatcher()
+	{
+		return app()->make(EventDispatcher::class);
 	}
 }
 

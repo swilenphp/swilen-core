@@ -125,9 +125,19 @@ class Request extends SupportRequest implements \ArrayAccess
      *
      * @return static
      */
-    public static function create()
+    public static function capture()
     {
         return static::createFromGlobals();
+    }
+
+    /**
+     * Creates a new request with values from PHP's super globals.
+     *
+     * @return static
+     */
+    public static function captureFromContext(array $server = [], array $files = [], array $request = [], array $query = [], $body = null)
+    {
+        return new static($server, $files, $request, $query, $body);
     }
 
     /**
@@ -246,7 +256,7 @@ class Request extends SupportRequest implements \ArrayAccess
     private function filteredRequestUri()
     {
         if (isset($_ENV['APP_BASE_URI']) && !empty($base = $_ENV['APP_BASE_URI'])) {
-            return $this->uri = preg_replace('#^'.$base.'#', '', $this->server->get('REQUEST_URI'));
+            return $this->uri = preg_replace('#^' . $base . '#', '', $this->server->get('REQUEST_URI'));
         }
 
         return $this->uri = $this->server->get('REQUEST_URI');
@@ -388,7 +398,8 @@ class Request extends SupportRequest implements \ArrayAccess
     public function all()
     {
         return array_replace_recursive(
-            $this->getInputSource()->all() + $this->query->all(), $this->files->all(),
+            $this->getInputSource()->all() + $this->query->all(),
+            $this->files->all(),
         );
     }
 

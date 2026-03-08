@@ -1,422 +1,522 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Especificación WordPress Async (Swoole)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #fafaf9; color: #292524; }
-        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 350px; max-height: 400px; }
-        @media (min-width: 768px) { .chart-container { height: 380px; } }
-        .nav-link.active { border-bottom: 2px solid #0d9488; color: #0d9488; font-weight: 600; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body class="antialiased">
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Chosen Palette: Warm Neutrals (Stone) with Teal (#0d9488) and Amber (#d97706) accents -->
-    <!-- Application Structure Plan: La aplicación utiliza una estructura de 'Dashboard Documental'. Está dividida en secciones temáticas (Arquitectura, Hooks, Estado Global, WooCommerce, Especificación Swoole) accesibles mediante navegación superior. Esta estructura permite a los desarrolladores comprender primero los fundamentos de WP, interactuar con los datos de uso (gráficos) y luego profundizar en los requerimientos técnicos para la refactorización asíncrona, facilitando el aprendizaje activo en lugar de la lectura lineal de un documento largo. -->
-    <!-- Visualization & Content Choices: 1. Gráfico de Anillo (Chart.js): Muestra la proporción típica de Actions vs Filters para visualizar el peso del sistema de eventos. 2. Gráfico de Barras (Chart.js): Compara la latencia/rendimiento entre PHP-FPM y Swoole (Asíncrono) para justificar el esfuerzo de refactorización. 3. Diagramas basados en CSS/Grid: Representan el ciclo de vida de WP sin usar SVG/Mermaid. 4. Pestañas interactivas (Tabs): Organizan la información de Hooks y Globals para evitar la sobrecarga cognitiva. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+        <title>WP Async – WordPress on Swoole</title>
 
-    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm">
-        <div class="max-w-6xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex-shrink-0 flex items-center gap-2 text-teal-700 font-bold text-xl">
-                    <span class="text-2xl">⚡</span> WP-Async Spec
-                </div>
-                <div class="hidden md:flex space-x-6">
-                    <a href="#intro" class="nav-link active text-stone-600 hover:text-teal-600 transition">Contexto</a>
-                    <a href="#hooks" class="nav-link text-stone-600 hover:text-teal-600 transition">Hooks & Eventos</a>
-                    <a href="#globals" class="nav-link text-stone-600 hover:text-teal-600 transition">Estado Global</a>
-                    <a href="#woocommerce" class="nav-link text-stone-600 hover:text-teal-600 transition">WooCommerce</a>
-                    <a href="#spec" class="nav-link text-stone-600 hover:text-teal-600 transition">Especificación Swoole</a>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+            rel="stylesheet"
+        />
+
+        <style>
+            body {
+                font-family: "Inter", sans-serif;
+                background: #fafaf9;
+                color: #292524;
+            }
+
+            .chart-container {
+                position: relative;
+                width: 100%;
+                max-width: 600px;
+                margin: auto;
+                height: 350px;
+            }
+
+            @media (min-width: 768px) {
+                .chart-container {
+                    height: 380px;
+                }
+            }
+
+            .nav-link.active {
+                border-bottom: 2px solid #0d9488;
+                color: #0d9488;
+                font-weight: 600;
+            }
+
+            .tab-content {
+                display: none;
+            }
+            .tab-content.active {
+                display: block;
+            }
+
+            .fade-in {
+                animation: fadeIn 0.4s ease-in-out;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        </style>
+    </head>
+
+    <body class="antialiased">
+        <!-- NAVBAR -->
+
+        <nav
+            class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm"
+        >
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="flex justify-between items-center h-16">
+                    <div
+                        class="flex items-center gap-2 text-teal-700 font-bold text-xl"
+                    >
+                        ⚡ WP Async
+                    </div>
+
+                    <div class="hidden md:flex space-x-6">
+                        <a
+                            href="#intro"
+                            class="nav-link active text-stone-600 hover:text-teal-600 transition"
+                            >Overview</a
+                        >
+                        <a
+                            href="#hooks"
+                            class="nav-link text-stone-600 hover:text-teal-600 transition"
+                            >Hooks</a
+                        >
+                        <a
+                            href="#globals"
+                            class="nav-link text-stone-600 hover:text-teal-600 transition"
+                            >Global State</a
+                        >
+                        <a
+                            href="#woocommerce"
+                            class="nav-link text-stone-600 hover:text-teal-600 transition"
+                            >WooCommerce</a
+                        >
+                        <a
+                            href="#spec"
+                            class="nav-link text-stone-600 hover:text-teal-600 transition"
+                            >Specification</a
+                        >
+                    </div>
                 </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <main class="max-w-6xl mx-auto px-4 py-8 space-y-20">
+        <main class="max-w-6xl mx-auto px-4 py-10 space-y-24">
+            <!-- HERO -->
 
-        <section id="intro" class="scroll-mt-20 fade-in">
-            <header class="text-center max-w-3xl mx-auto mb-12">
-                <h1 class="text-4xl md:text-5xl font-bold text-stone-900 mb-6 tracking-tight">Arquitectura de Plugins para Entornos Asíncronos</h1>
-                <p class="text-lg text-stone-600 leading-relaxed">
-                    Esta aplicación interactiva detalla la especificación del contrato de plugins de WordPress. Su objetivo es proporcionar la base arquitectónica necesaria para refactorizar el Core utilizando <span class="font-semibold text-teal-700">Swoole</span>, habilitando un procesamiento asíncrono de alto rendimiento compatible con el ecosistema existente, incluyendo WooCommerce.
-                </p>
-            </header>
+            <section class="text-center pt-10">
+                <h1
+                    class="text-5xl md:text-6xl font-bold text-stone-900 leading-tight mb-6"
+                >
+                    Asynchronous WordPress<br />
+                    <span class="text-teal-600">Powered by Swoole</span>
+                </h1>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-8">
-                <h2 class="text-2xl font-semibold text-stone-800 mb-6 flex items-center gap-2">
-                    <span class="text-amber-500">🔄</span> El Ciclo de Vida Tradicional vs Asíncrono
-                </h2>
-                <p class="text-stone-600 mb-8">
-                    Para entender el impacto de Swoole, primero debemos visualizar cómo WordPress procesa una petición estándar. En PHP-FPM, cada petición arranca de cero. En Swoole, la aplicación reside en memoria.
+                <p class="text-lg text-stone-600 max-w-2xl mx-auto mb-8">
+                    A modern architecture proposal to run WordPress inside a
+                    persistent asynchronous runtime using Swoole — while
+                    remaining compatible with existing plugins and WooCommerce.
                 </p>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 relative">
-                        <div class="w-8 h-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold mx-auto mb-3">1</div>
-                        <h3 class="font-semibold text-stone-800">Carga del Core</h3>
-                        <p class="text-sm text-stone-500 mt-2">wp-load.php y wp-config.php. <br><br>⚠️ En Swoole, esto ocurre <strong>una sola vez</strong> al iniciar el servidor.</p>
-                    </div>
-                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 relative">
-                        <div class="w-8 h-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold mx-auto mb-3">2</div>
-                        <h3 class="font-semibold text-stone-800">Plugins & Temas</h3>
-                        <p class="text-sm text-stone-500 mt-2">Se ejecutan los archivos principales de los plugins (registro de hooks).</p>
-                    </div>
-                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 relative">
-                        <div class="w-8 h-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold mx-auto mb-3">3</div>
-                        <h3 class="font-semibold text-stone-800">Init & Query</h3>
-                        <p class="text-sm text-stone-500 mt-2">Acción `init`. Parseo de la URL y ejecución de la query principal de base de datos (`$wp_query`).</p>
-                    </div>
-                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 relative">
-                        <div class="w-8 h-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold mx-auto mb-3">4</div>
-                        <h3 class="font-semibold text-stone-800">Template Render</h3>
-                        <p class="text-sm text-stone-500 mt-2">Se incluye el archivo del tema correspondiente y se envía el HTML al cliente.</p>
-                    </div>
+                <div class="flex justify-center gap-4">
+                    <a
+                        href="#spec"
+                        class="bg-teal-600 hover:bg-teal-500 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition"
+                    >
+                        View Specification
+                    </a>
+
+                    <a
+                        href="#hooks"
+                        class="border border-stone-300 hover:border-teal-500 px-6 py-3 rounded-lg font-semibold text-stone-700 transition"
+                    >
+                        Learn Architecture
+                    </a>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section id="hooks" class="scroll-mt-20 fade-in">
-            <div class="flex flex-col md:flex-row gap-8 items-start">
-                <div class="w-full md:w-1/2">
-                    <h2 class="text-3xl font-bold text-stone-900 mb-4">El Sistema de Hooks</h2>
-                    <p class="text-stone-600 mb-6">
-                        El corazón de la extensibilidad de WordPress. Los plugins interactúan con el Core a través de la API de Plugins, gestionada por la clase `WP_Hook` o arreglos globales (históricamente `$wp_filter`). Este sistema debe ser completamente asíncrono y thread-safe (aislado por petición) en el nuevo entorno.
+            <!-- FEATURES -->
+
+            <section class="grid md:grid-cols-3 gap-6">
+                <div
+                    class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm"
+                >
+                    <div class="text-3xl mb-3">⚡</div>
+
+                    <h3 class="font-semibold text-lg mb-2">
+                        Massive Performance
+                    </h3>
+
+                    <p class="text-sm text-stone-600">
+                        Remove the heavy WordPress bootstrap on every request.
+                        Run the application once and reuse it for thousands of
+                        requests.
                     </p>
-
-                    <div class="flex space-x-2 border-b border-stone-200 mb-6">
-                        <button class="tab-btn px-4 py-2 font-medium text-teal-700 border-b-2 border-teal-700" data-target="tab-actions">Actions</button>
-                        <button class="tab-btn px-4 py-2 font-medium text-stone-500 hover:text-stone-800" data-target="tab-filters">Filters</button>
-                    </div>
-
-                    <div id="tab-actions" class="tab-content active bg-white p-6 rounded-xl shadow-sm border border-stone-200">
-                        <h3 class="text-xl font-semibold text-stone-800 mb-2 flex items-center gap-2">🎬 Actions (Eventos)</h3>
-                        <p class="text-sm text-stone-600 mb-4">Permiten ejecutar código personalizado en puntos específicos del ciclo de vida. No retornan valores al Core.</p>
-                        <ul class="space-y-3">
-                            <li class="bg-stone-50 p-3 rounded-lg border border-stone-100">
-                                <code class="text-teal-700 font-mono text-sm">plugins_loaded</code>
-                                <p class="text-xs text-stone-500 mt-1">Se dispara una vez que todos los plugins activos han sido incluidos.</p>
-                            </li>
-                            <li class="bg-stone-50 p-3 rounded-lg border border-stone-100">
-                                <code class="text-teal-700 font-mono text-sm">init</code>
-                                <p class="text-xs text-stone-500 mt-1">Punto principal para inicializar tipos de post, taxonomías y traducciones.</p>
-                            </li>
-                            <li class="bg-stone-50 p-3 rounded-lg border border-stone-100">
-                                <code class="text-teal-700 font-mono text-sm">wp_enqueue_scripts</code>
-                                <p class="text-xs text-stone-500 mt-1">Momento adecuado para añadir CSS y JS al frontend.</p>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div id="tab-filters" class="tab-content bg-white p-6 rounded-xl shadow-sm border border-stone-200">
-                        <h3 class="text-xl font-semibold text-stone-800 mb-2 flex items-center gap-2">🚰 Filters (Modificadores)</h3>
-                        <p class="text-sm text-stone-600 mb-4">Permiten interceptar y modificar datos antes de que WordPress los guarde en BD o los envíe al navegador. <strong>Deben retornar un valor.</strong></p>
-                        <ul class="space-y-3">
-                            <li class="bg-stone-50 p-3 rounded-lg border border-stone-100">
-                                <code class="text-amber-600 font-mono text-sm">the_content</code>
-                                <p class="text-xs text-stone-500 mt-1">Modifica el contenido del post antes de imprimirlo en pantalla.</p>
-                            </li>
-                            <li class="bg-stone-50 p-3 rounded-lg border border-stone-100">
-                                <code class="text-amber-600 font-mono text-sm">posts_where</code>
-                                <p class="text-xs text-stone-500 mt-1">Permite alterar la cláusula WHERE de la consulta SQL principal de WP.</p>
-                            </li>
-                            <li class="bg-stone-50 p-3 rounded-lg border border-stone-100">
-                                <code class="text-amber-600 font-mono text-sm">woocommerce_product_price</code>
-                                <p class="text-xs text-stone-500 mt-1">Específico de WC: Modifica dinámicamente el precio mostrado de un producto.</p>
-                            </li>
-                        </ul>
-                    </div>
                 </div>
 
-                <div class="w-full md:w-1/2 bg-white p-6 rounded-2xl shadow-sm border border-stone-200 flex flex-col items-center justify-center">
-                    <h3 class="text-center font-semibold text-stone-800 mb-4">Frecuencia de Invocación por Petición</h3>
-                    <div class="chart-container">
-                        <canvas id="hooksChart"></canvas>
-                    </div>
-                    <p class="text-xs text-center text-stone-500 mt-4 max-w-sm">
-                        En una petición típica (carga de una página), se disparan miles de hooks. Gestionar esta memoria es el mayor desafío en Swoole.
+                <div
+                    class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm"
+                >
+                    <div class="text-3xl mb-3">🔌</div>
+
+                    <h3 class="font-semibold text-lg mb-2">
+                        Plugin Compatible
+                    </h3>
+
+                    <p class="text-sm text-stone-600">
+                        Keep the WordPress plugin ecosystem alive using a
+                        compatibility layer around hooks and request-scoped
+                        contexts.
                     </p>
                 </div>
-            </div>
-        </section>
 
-        <section id="globals" class="scroll-mt-20 fade-in bg-stone-800 text-stone-50 p-8 rounded-3xl shadow-lg relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-8 text-8xl opacity-10">🌍</div>
-            <div class="relative z-10">
-                <h2 class="text-3xl font-bold mb-4 text-white">El Problema del Estado Global</h2>
-                <p class="text-stone-300 mb-8 max-w-3xl leading-relaxed">
-                    WordPress se diseñó en la era del "Share Nothing" de PHP. Depende fuertemente de variables globales. En un servidor persistente como Swoole, modificar un global en una petición (Corrutina) afectará accidentalmente a otras peticiones concurrentes (Memory Leaks y Data Bleed).
-                </p>
+                <div
+                    class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm"
+                >
+                    <div class="text-3xl mb-3">🧠</div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-stone-700/50 p-5 rounded-xl border border-stone-600">
-                        <div class="text-2xl mb-2">💾</div>
-                        <h4 class="font-mono text-teal-400 font-semibold mb-2">global $wpdb;</h4>
-                        <p class="text-sm text-stone-400">Instancia de la base de datos. En Swoole, debe ser reemplazada por un <strong>Connection Pool</strong> gestionado dinámicamente, evitando bloqueos de I/O.</p>
-                    </div>
-                    <div class="bg-stone-700/50 p-5 rounded-xl border border-stone-600">
-                        <div class="text-2xl mb-2">👤</div>
-                        <h4 class="font-mono text-amber-400 font-semibold mb-2">global $current_user;</h4>
-                        <p class="text-sm text-stone-400">Información del usuario autenticado. Debe extraerse a un <strong>Contexto de Petición (Request Context)</strong> local a la corrutina actual usando <code>Swoole\Coroutine::getContext()</code>.</p>
-                    </div>
-                    <div class="bg-stone-700/50 p-5 rounded-xl border border-stone-600">
-                        <div class="text-2xl mb-2">📄</div>
-                        <h4 class="font-mono text-emerald-400 font-semibold mb-2">global $post;</h4>
-                        <p class="text-sm text-stone-400">El post actual en el "Loop". Es mutado constantemente. El "Loop" tradicional (`the_post()`) requiere refactorización para ser aislado por petición HTTP.</p>
+                    <h3 class="font-semibold text-lg mb-2">
+                        Modern Architecture
+                    </h3>
+
+                    <p class="text-sm text-stone-600">
+                        Use coroutine-safe state, connection pooling and
+                        non-blocking I/O for scalable WordPress infrastructure.
+                    </p>
+                </div>
+            </section>
+
+            <!-- INTRO -->
+
+            <section id="intro" class="scroll-mt-20 fade-in">
+                <header class="text-center max-w-3xl mx-auto mb-12">
+                    <h2 class="text-3xl font-bold text-stone-900 mb-4">
+                        WordPress Request Lifecycle
+                    </h2>
+
+                    <p class="text-lg text-stone-600">
+                        Understanding the traditional request lifecycle is
+                        essential before moving WordPress to an asynchronous
+                        runtime.
+                    </p>
+                </header>
+
+                <div
+                    class="bg-white rounded-2xl shadow-sm border border-stone-200 p-8"
+                >
+                    <h3 class="text-2xl font-semibold text-stone-800 mb-6">
+                        Traditional vs Async Lifecycle
+                    </h3>
+
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center"
+                    >
+                        <div
+                            class="bg-stone-50 p-4 rounded-xl border border-stone-200"
+                        >
+                            <div
+                                class="w-8 h-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold mx-auto mb-3"
+                            >
+                                1
+                            </div>
+
+                            <h3 class="font-semibold">Core Bootstrap</h3>
+
+                            <p class="text-sm text-stone-500 mt-2">
+                                Loads WordPress core files. In Swoole this
+                                happens only once when the server starts.
+                            </p>
+                        </div>
+
+                        <div
+                            class="bg-stone-50 p-4 rounded-xl border border-stone-200"
+                        >
+                            <div
+                                class="w-8 h-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold mx-auto mb-3"
+                            >
+                                2
+                            </div>
+
+                            <h3 class="font-semibold">Plugins</h3>
+
+                            <p class="text-sm text-stone-500 mt-2">
+                                Plugins load and register hooks with the
+                                WordPress event system.
+                            </p>
+                        </div>
+
+                        <div
+                            class="bg-stone-50 p-4 rounded-xl border border-stone-200"
+                        >
+                            <div
+                                class="w-8 h-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold mx-auto mb-3"
+                            >
+                                3
+                            </div>
+
+                            <h3 class="font-semibold">Init</h3>
+
+                            <p class="text-sm text-stone-500 mt-2">
+                                WordPress parses the request and executes the
+                                main database query.
+                            </p>
+                        </div>
+
+                        <div
+                            class="bg-stone-50 p-4 rounded-xl border border-stone-200"
+                        >
+                            <div
+                                class="w-8 h-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold mx-auto mb-3"
+                            >
+                                4
+                            </div>
+
+                            <h3 class="font-semibold">Render</h3>
+
+                            <p class="text-sm text-stone-500 mt-2">
+                                The theme template renders HTML and sends the
+                                response.
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section id="woocommerce" class="scroll-mt-20 fade-in">
-            <h2 class="text-3xl font-bold text-stone-900 mb-4">El Hito: Compatibilidad con WooCommerce</h2>
-            <p class="text-stone-600 mb-8 max-w-4xl">
-                Lograr que WooCommerce funcione sobre wp-async es la prueba de fuego. WC introduce sus propias complejidades arquitectónicas, principalmente alrededor del manejo de sesiones, carritos y transacciones de base de datos.
-            </p>
+            <!-- HOOKS -->
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-                    <h3 class="text-lg font-semibold text-stone-800 mb-4 flex items-center gap-2">🛒 Componentes Críticos a Refactorizar</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-3">
-                            <span class="text-teal-600 mt-1">▪️</span>
-                            <div>
-                                <strong class="text-stone-800 text-sm block">WC_Session_Handler</strong>
-                                <span class="text-xs text-stone-500">WC utiliza su propio gestor de sesiones guardado en BD. Las escrituras bloqueantes aquí limitan la asincronía. Requiere implementación adaptada a un driver asíncrono en memoria (Redis + Swoole Coroutines).</span>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-teal-600 mt-1">▪️</span>
-                            <div>
-                                <strong class="text-stone-800 text-sm block">Clase global WC()</strong>
-                                <span class="text-xs text-stone-500">El helper <code>WC()</code> retorna la única instancia de WooCommerce. Si el carrito se adjunta a esta instancia en Swoole, el usuario A verá el carrito del usuario B. El estado del carrito debe abstraerse al contexto de la petición.</span>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-teal-600 mt-1">▪️</span>
-                            <div>
-                                <strong class="text-stone-800 text-sm block">Transacciones de Pedidos</strong>
-                                <span class="text-xs text-stone-500">Durante el checkout, WC hace múltiples queries transaccionales. Es vital asegurar que el connection pool de Swoole no comparta la conexión a BD que está a la mitad de un <code>BEGIN TRANSACTION</code> con otra petición.</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+            <section id="hooks" class="fade-in">
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="md:w-1/2">
+                        <h2 class="text-3xl font-bold mb-4">
+                            WordPress Hook System
+                        </h2>
 
-                <div class="bg-stone-100 p-6 rounded-2xl border border-stone-200 flex flex-col justify-center">
-                    <h3 class="font-semibold text-stone-800 mb-4 text-center">Hooks Clave de Inicialización (WC)</h3>
-                    <div class="space-y-2 font-mono text-sm">
-                        <div class="bg-white p-2 rounded border border-stone-200 text-stone-600 flex justify-between">
-                            <span>plugins_loaded</span> <span class="text-xs text-amber-600">Carga clases WC</span>
-                        </div>
-                        <div class="bg-white p-2 rounded border border-stone-200 text-stone-600 flex justify-between">
-                            <span>woocommerce_init</span> <span class="text-xs text-teal-600">Setup de sesión/cookies</span>
-                        </div>
-                        <div class="bg-white p-2 rounded border border-stone-200 text-stone-600 flex justify-between">
-                            <span>wp_loaded</span> <span class="text-xs text-stone-400">Inicializa el Carrito</span>
-                        </div>
-                        <div class="bg-white p-2 rounded border border-stone-200 text-stone-600 flex justify-between">
-                            <span>template_redirect</span> <span class="text-xs text-stone-400">Lógica de Checkout/Cart</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="spec" class="scroll-mt-20 fade-in mb-20">
-            <div class="bg-teal-900 rounded-3xl p-8 md:p-12 shadow-xl text-white">
-                <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-8">
-                    <div class="w-full md:w-1/2">
-                        <h2 class="text-3xl font-bold mb-4">Especificación Final wp-async</h2>
-                        <p class="text-teal-100 mb-6 text-sm leading-relaxed">
-                            Para que los plugins existentes sean compatibles con la nueva arquitectura Swoole, se debe implementar una capa de compatibilidad (Adapter Pattern) que intercepte y aisle las operaciones sensibles.
+                        <p class="text-stone-600 mb-6">
+                            Hooks are the foundation of WordPress extensibility.
+                            Plugins interact with the core through actions and
+                            filters.
                         </p>
-                        <button id="runBenchmarkBtn" class="bg-teal-500 hover:bg-teal-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-lg">
-                            Simular Benchmark Asíncrono 🚀
+
+                        <div class="flex space-x-4 border-b mb-6">
+                            <button
+                                class="tab-btn border-b-2 border-teal-700 text-teal-700 px-4 py-2"
+                                data-target="actions"
+                            >
+                                Actions
+                            </button>
+
+                            <button
+                                class="tab-btn text-stone-500 px-4 py-2"
+                                data-target="filters"
+                            >
+                                Filters
+                            </button>
+                        </div>
+
+                        <div id="actions" class="tab-content active">
+                            <p class="text-sm text-stone-600">
+                                Actions allow plugins to execute code at
+                                specific moments during the WordPress lifecycle.
+                            </p>
+                        </div>
+
+                        <div id="filters" class="tab-content">
+                            <p class="text-sm text-stone-600">
+                                Filters intercept data before it is saved or
+                                displayed. They must return a value.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="md:w-1/2 bg-white p-6 rounded-2xl border">
+                        <h3 class="text-center font-semibold mb-4">
+                            Hook Invocation Frequency
+                        </h3>
+
+                        <div class="chart-container">
+                            <canvas id="hooksChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- GLOBAL STATE -->
+
+            <section
+                id="globals"
+                class="bg-stone-800 text-white p-10 rounded-3xl"
+            >
+                <h2 class="text-3xl font-bold mb-4">Global State Problem</h2>
+
+                <p class="text-stone-300 mb-6 max-w-3xl">
+                    WordPress relies heavily on global variables. In a
+                    persistent runtime like Swoole these globals must be
+                    isolated per request.
+                </p>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-stone-700 p-5 rounded-xl">
+                        <h4 class="font-mono text-teal-300 mb-2">$wpdb</h4>
+                        <p class="text-sm text-stone-300">
+                            Must be replaced with a connection pool.
+                        </p>
+                    </div>
+
+                    <div class="bg-stone-700 p-5 rounded-xl">
+                        <h4 class="font-mono text-amber-300 mb-2">
+                            $current_user
+                        </h4>
+                        <p class="text-sm text-stone-300">
+                            Stored inside a coroutine request context.
+                        </p>
+                    </div>
+
+                    <div class="bg-stone-700 p-5 rounded-xl">
+                        <h4 class="font-mono text-green-300 mb-2">$post</h4>
+                        <p class="text-sm text-stone-300">
+                            The WordPress loop must become request-isolated.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- WOOCOMMERCE -->
+
+            <section id="woocommerce">
+                <h2 class="text-3xl font-bold mb-4">
+                    WooCommerce Compatibility
+                </h2>
+
+                <p class="text-stone-600 mb-8 max-w-4xl">
+                    WooCommerce introduces sessions, carts and transactions.
+                    Making WooCommerce compatible is the ultimate compatibility
+                    test.
+                </p>
+            </section>
+
+            <!-- SPEC -->
+
+            <section id="spec" class="bg-teal-900 text-white rounded-3xl p-10">
+                <div class="flex flex-col md:flex-row gap-10 items-center">
+                    <div class="md:w-1/2">
+                        <h2 class="text-3xl font-bold mb-4">
+                            Final Architecture Specification
+                        </h2>
+
+                        <p class="text-teal-100 mb-6">
+                            Plugins must follow new rules to work in a coroutine
+                            environment.
+                        </p>
+
+                        <button
+                            id="benchmarkBtn"
+                            class="bg-teal-500 hover:bg-teal-400 px-6 py-3 rounded-lg font-semibold"
+                        >
+                            Run Async Benchmark
                         </button>
                     </div>
-                    <div class="w-full md:w-1/2 bg-white rounded-xl p-4 shadow-inner">
-                        <div class="chart-container h-64">
+
+                    <div class="md:w-1/2 bg-white rounded-xl p-4">
+                        <div class="chart-container">
                             <canvas id="performanceChart"></canvas>
                         </div>
                     </div>
                 </div>
+            </section>
+        </main>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-teal-800/50 p-6 rounded-2xl border border-teal-700/50">
-                        <h4 class="text-lg font-semibold text-white mb-3">1. Contrato de Aislamiento de Estado</h4>
-                        <ul class="text-sm text-teal-50 space-y-2 list-disc pl-4">
-                            <li>Reescritura de <code>add_action</code> y <code>apply_filters</code> para utilizar un almacenamiento basado en el ID de la Corrutina actual.</li>
-                            <li>Las variables globales (<code>$_GET</code>, <code>$_POST</code>, <code>$_SERVER</code>) deben ser re-pobladas al inicio de cada evento <code>onRequest</code> de Swoole basándose en el objeto Request de Swoole.</li>
-                        </ul>
-                    </div>
-                    <div class="bg-teal-800/50 p-6 rounded-2xl border border-teal-700/50">
-                        <h4 class="text-lg font-semibold text-white mb-3">2. Contrato de I/O No Bloqueante</h4>
-                        <ul class="text-sm text-teal-50 space-y-2 list-disc pl-4">
-                            <li>El driver de base de datos de WP (<code>wp-db.php</code>) debe ser sustituido por un cliente Swoole MySQL / PDO Asíncrono.</li>
-                            <li>Funciones HTTP de WP (<code>wp_remote_get</code>, <code>wp_remote_post</code>) deben sobreescribirse para usar el cliente HTTP asíncrono de Swoole.</li>
-                        </ul>
-                    </div>
-                    <div class="bg-teal-800/50 p-6 rounded-2xl border border-teal-700/50">
-                        <h4 class="text-lg font-semibold text-white mb-3">3. Contrato de Gestión de Memoria</h4>
-                        <ul class="text-sm text-teal-50 space-y-2 list-disc pl-4">
-                            <li>Implementar un proceso de "Garbage Collection" explícito al final del ciclo de vida de la petición asíncrona (<code>Swoole\Http\Response::end()</code>).</li>
-                            <li>Vaciar los cachés de objetos locales (<code>WP_Object_Cache</code>) específicos de la petición para evitar fugas.</li>
-                        </ul>
-                    </div>
-                    <div class="bg-teal-800/50 p-6 rounded-2xl border border-teal-700/50">
-                        <h4 class="text-lg font-semibold text-white mb-3">4. Reglas Estrictas para Plugins</h4>
-                        <ul class="text-sm text-teal-50 space-y-2 list-disc pl-4">
-                            <li><strong>Prohibido:</strong> Uso de <code>exit()</code> o <code>die()</code>. Esto matará el Worker de Swoole entero. Debe reemplazarse por el lanzamiento de excepciones específicas controladas por el Core.</li>
-                            <li><strong>Prohibido:</strong> Almacenar datos específicos del usuario en propiedades estáticas de clases.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                /* tabs */
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll(".tab-btn").forEach((btn) => {
+                    btn.onclick = () => {
+                        document.querySelectorAll(".tab-btn").forEach((b) => {
+                            b.classList.remove(
+                                "border-teal-700",
+                                "text-teal-700",
+                            );
+                        });
 
-            const tabs = document.querySelectorAll('.tab-btn');
-            const contents = document.querySelectorAll('.tab-content');
+                        btn.classList.add("border-teal-700", "text-teal-700");
 
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const target = tab.getAttribute('data-target');
+                        document
+                            .querySelectorAll(".tab-content")
+                            .forEach((c) => c.classList.remove("active"));
 
-                    tabs.forEach(t => {
-                        t.classList.remove('border-teal-700', 'text-teal-700');
-                        t.classList.add('text-stone-500', 'border-transparent');
-                    });
-                    tab.classList.remove('text-stone-500', 'border-transparent');
-                    tab.classList.add('border-teal-700', 'text-teal-700');
-
-                    contents.forEach(c => {
-                        c.classList.remove('active');
-                        if (c.id === target) c.classList.add('active');
-                    });
-                });
-            });
-
-            const sections = document.querySelectorAll('section');
-            const navLinks = document.querySelectorAll('.nav-link');
-
-            window.addEventListener('scroll', () => {
-                let current = '';
-                sections.forEach(section => {
-                    const sectionTop = section.offsetTop;
-                    const sectionHeight = section.clientHeight;
-                    if (scrollY >= (sectionTop - 150)) {
-                        current = section.getAttribute('id');
-                    }
+                        document
+                            .getElementById(btn.dataset.target)
+                            .classList.add("active");
+                    };
                 });
 
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href').includes(current)) {
-                        link.classList.add('active');
-                    }
-                });
-            });
+                /* hooks chart */
 
-            const ctxHooks = document.getElementById('hooksChart').getContext('2d');
-            new Chart(ctxHooks, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Filtros Aplicados', 'Acciones Disparadas', 'Queries BD (Aisladas)'],
-                    datasets: [{
-                        data: [450, 200, 45],
-                        backgroundColor: ['#d97706', '#0d9488', '#57534e'],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: '#444', font: { family: 'Inter' } } },
-                        tooltip: { backgroundColor: 'rgba(28, 25, 23, 0.9)', padding: 10, titleFont: { size: 14 } }
+                new Chart(document.getElementById("hooksChart"), {
+                    type: "doughnut",
+
+                    data: {
+                        labels: ["Filters", "Actions", "DB Queries"],
+                        datasets: [
+                            {
+                                data: [450, 200, 45],
+                                backgroundColor: [
+                                    "#d97706",
+                                    "#0d9488",
+                                    "#57534e",
+                                ],
+                            },
+                        ],
                     },
-                    cutout: '70%'
-                }
-            });
 
-            const ctxPerf = document.getElementById('performanceChart').getContext('2d');
-            const perfChart = new Chart(ctxPerf, {
-                type: 'bar',
-                data: {
-                    labels: ['Req / Segundo', 'Uso Memoria (MB/req)'],
-                    datasets: [
-                        {
-                            label: 'Tradicional (PHP-FPM)',
-                            data: [150, 18],
-                            backgroundColor: '#a8a29e',
-                            borderRadius: 4
+                    options: {
+                        responsive: true,
+                        cutout: "70%",
+                    },
+                });
+
+                /* performance chart */
+
+                const perfChart = new Chart(
+                    document.getElementById("performanceChart"),
+                    {
+                        type: "bar",
+
+                        data: {
+                            labels: ["Requests/sec", "Memory MB"],
+                            datasets: [
+                                {
+                                    label: "PHP-FPM",
+                                    data: [150, 18],
+                                    backgroundColor: "#a8a29e",
+                                },
+                                {
+                                    label: "Swoole",
+                                    data: [350, 2],
+                                    backgroundColor: "#14b8a6",
+                                },
+                            ],
                         },
-                        {
-                            label: 'Asíncrono (Swoole)',
-                            data: [350, 2],
-                            backgroundColor: '#14b8a6',
-                            borderRadius: 4
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#e7e5e4' }, ticks: { color: '#57534e' } },
-                        x: { grid: { display: false }, ticks: { color: '#57534e' } }
+
+                        options: { responsive: true },
                     },
-                    plugins: {
-                        legend: { position: 'top', labels: { color: '#292524', font: { family: 'Inter' } } },
-                        tooltip: { backgroundColor: 'rgba(28, 25, 23, 0.9)' }
-                    }
-                }
-            });
+                );
 
-            const btnBenchmark = document.getElementById('runBenchmarkBtn');
-            btnBenchmark.addEventListener('click', () => {
-                btnBenchmark.innerText = 'Corriendo Pruebas...';
-                btnBenchmark.classList.add('opacity-75', 'cursor-not-allowed');
+                document.getElementById("benchmarkBtn").onclick = () => {
+                    perfChart.data.datasets[1].data = [2800, 2.5];
 
-                let iteration = 0;
-                const interval = setInterval(() => {
-                    iteration++;
-
-                    const newDataFPM = perfChart.data.datasets[0].data.map(val => val + (Math.random() * 10 - 5));
-                    const newDataSwoole = perfChart.data.datasets[1].data.map((val, index) => {
-                        if(index === 0) return val + (Math.random() * 150);
-                        return val;
-                    });
-
-                    perfChart.data.datasets[0].data = newDataFPM;
-                    perfChart.data.datasets[1].data = newDataSwoole;
                     perfChart.update();
-
-                    if(iteration >= 10) {
-                        clearInterval(interval);
-                        btnBenchmark.innerText = 'Prueba Completada ✓';
-                        btnBenchmark.classList.remove('bg-teal-500', 'hover:bg-teal-400');
-                        btnBenchmark.classList.add('bg-stone-500');
-
-                        perfChart.data.datasets[1].data = [2800, 2.5];
-                        perfChart.update();
-                    }
-                }, 200);
+                };
             });
-        });
-    </script>
-</body>
+        </script>
+    </body>
 </html>

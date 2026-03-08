@@ -4,6 +4,8 @@ namespace Swilen\Arthropod;
 
 use Swilen\Arthropod\Contract\ExceptionHandler;
 use Swilen\Container\Container;
+use Swilen\Events\Dispatcher;
+use Swilen\Events\EventDispatcher;
 use Swilen\Http\Request;
 use Swilen\Petiole\Facade;
 use Swilen\Pipeline\Pipeline;
@@ -18,7 +20,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @var string
      */
-    public const VERSION = '0.7.2-alpha';
+    public const VERSION = '0.0.1-dev';
 
     /**
      * Indicates if the application has been bootstrapped before.
@@ -125,6 +127,8 @@ class Application extends Container implements ArthropodApplication, HttpApplica
         $this->registerBaseBindings();
         $this->registerServiceProviders();
         $this->registerCoreContainerAliases();
+
+        $this->instance(EventDispatcher::class, new EventDispatcher());
     }
 
     /**
@@ -198,7 +202,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     public function basePath(string $path = '')
     {
-        return $this->basePath.($path ? DIRECTORY_SEPARATOR.$path : $path);
+        return $this->basePath . ($path ? DIRECTORY_SEPARATOR . $path : $path);
     }
 
     /**
@@ -226,7 +230,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     public function appPath(string $path = '')
     {
-        return $this->basePath($this->appPath).($path ? DIRECTORY_SEPARATOR.$path : $path);
+        return $this->basePath($this->appPath) . ($path ? DIRECTORY_SEPARATOR . $path : $path);
     }
 
     /**
@@ -282,7 +286,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     public function appUri(string $path = '')
     {
-        return $this->appUri.($path ? '/'.$path : '');
+        return $this->appUri . ($path ? '/' . $path : '');
     }
 
     /**
@@ -308,7 +312,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     public function storagePath(string $path = '')
     {
-        return $this->appPath('storage').($path ? DIRECTORY_SEPARATOR.$path : '');
+        return $this->appPath('storage') . ($path ? DIRECTORY_SEPARATOR . $path : '');
     }
 
     /**
@@ -369,7 +373,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
     public function useEnvironment(string $env)
     {
         $this->instance('env', $env);
-        
+
         return $this;
     }
 
@@ -600,11 +604,13 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     protected function registerCoreContainerAliases()
     {
-        foreach ([
-            'app' => \Swilen\Arthropod\Application::class,
-            'request' => \Swilen\Http\Request::class,
-            'response' => \Swilen\Http\Response::class,
-        ] as $key => $value) {
+        foreach (
+            [
+                'app' => \Swilen\Arthropod\Application::class,
+                'request' => \Swilen\Http\Request::class,
+                'response' => \Swilen\Http\Response::class,
+            ] as $key => $value
+        ) {
             $this->alias($key, $value);
         }
     }

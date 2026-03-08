@@ -3,13 +3,16 @@
     "description": "Swilen is an experimental next-generation WordPress runtime designed to be async, headless-first, and significantly faster, while maintaining compatibility with existing WordPress plugins through a legacy adapter layer.",
     "type": "project",
     "license": "MIT",
+    "version": "0.0.1-dev",
     "autoload": {
         "psr-4": {
             "Swilen\\": "src"
         },
         "files": [
             "src/Arthropod/helpers.php",
-            "src/Shared/functions.php"
+            "src/Shared/functions.php",
+            "src/Wp/Hooks/functions.php",
+            "src/Wp/Plugins/functions.php"
         ]
     },
     "authors": [

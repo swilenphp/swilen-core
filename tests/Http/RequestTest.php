@@ -7,7 +7,7 @@ use Swilen\Http\Request;
 uses()->group('Http', 'Request');
 
 beforeEach(function () {
-    $this->request = Request::create();
+    $this->request = Request::capture();
 });
 
 it('Test if request is created without errors', function () {
@@ -33,7 +33,7 @@ it('Request instance created with empty attributes', function () {
 });
 
 it('Request instance created with superglobals from static method', function () {
-    $request = Request::create();
+    $request = Request::capture();
 
     expect($request->server->all())->toBeArray()->not->toBeEmpty();
     expect($request->headers->all())->toBeArray()->toBeEmpty();
@@ -44,7 +44,7 @@ it('Request instance created with superglobals from static method', function () 
 });
 
 it('Access current request instance attributes with available methods', function () {
-    $request = Request::create();
+    $request = Request::capture();
 
     expect($request->server('REQUEST_METHOD'))->toBeNull();
     expect($request->server('REQUEST_METHOD', 'GET'))->toBe('GET');
@@ -57,7 +57,7 @@ it('Access current request instance attributes with available methods', function
 });
 
 it('Access current request instance attributes ass array or object by magic methods', function () {
-    $request = Request::create();
+    $request = Request::capture();
 
     $request->property = null;
 
@@ -214,7 +214,7 @@ it('Request pathInfo is cached', function () {
 });
 
 it('Set user to request instance', function () {
-    $request = Request::create('');
+    $request = Request::capture();
 
     expect($request->user())->toBeNull();
 
