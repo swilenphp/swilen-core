@@ -2,6 +2,7 @@
 
 use Swilen\Arthropod\Application;
 use Swilen\Arthropod\Env;
+use Swilen\Cache\Cache;
 use Swilen\Container\Container;
 use Swilen\Events\Dispatcher;
 use Swilen\Events\EventDispatcher;
@@ -34,6 +35,18 @@ if (!function_exists("dispatcher")) {
 	function dispatcher()
 	{
 		return app()->make(EventDispatcher::class);
+	}
+}
+
+if (!function_exists('cache')) {
+	/**
+	 * Helper function for manage cache instance.
+	 *
+	 * @return \Swilen\Cache\Cache
+	 */
+	function cache()
+	{
+		return app()->make(Cache::class);
 	}
 }
 
@@ -112,7 +125,7 @@ if (!function_exists('config')) {
 	 *
 	 * @return mixed|\Swilen\Config\Contract\ConfigRepository
 	 */
-	function config(string $key = null, $default = null)
+	function config(?string $key = null, $default = null)
 	{
 		/**
 		 * @var \Swilen\Config\Contract\ConfigRepository

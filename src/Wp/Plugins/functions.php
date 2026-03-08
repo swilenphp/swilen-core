@@ -21,14 +21,6 @@
  * @package Swilen\Wp\Plugins
  */
 
-if (!defined('WP_PLUGIN_DIR')) {
-    define('WP_PLUGIN_DIR', base_path('plugins'));
-}
-
-if (!defined('WPMU_PLUGIN_DIR')) {
-    define('WPMU_PLUGIN_DIR', base_path('mu-plugins'));
-}
-
 // ============================================================================
 // PLUGINS API
 // ============================================================================

@@ -166,13 +166,16 @@ class Container implements \ArrayAccess, ContainerContract
 
         if (!$concrete instanceof \Closure) {
             if (!is_string($concrete)) {
-                throw new \TypeError(self::class.'::bind(): Argument #2 ($concrete) must be of type Closure|string|null');
+                throw new \TypeError(self::class . '::bind(): Argument #2 ($concrete) must be of type Closure|string|null');
             }
 
             $concrete = $this->getClosure($abstract, $concrete);
         }
 
-        $this->bindings[$abstract] = compact('concrete', 'shared');
+        $this->bindings[$abstract] = [
+            'concrete' => $concrete,
+            'shared' => $shared
+        ];
     }
 
     /**
@@ -244,7 +247,7 @@ class Container implements \ArrayAccess, ContainerContract
     protected function parseBindMethod($method)
     {
         if (is_array($method)) {
-            return $method[0].'@'.$method[1];
+            return $method[0] . '@' . $method[1];
         }
 
         return $method;
@@ -260,7 +263,12 @@ class Container implements \ArrayAccess, ContainerContract
      */
     public function callMethodBinding($method, $instance)
     {
-        return call_user_func($this->methodBindings[$method], $instance, $this);
+        $fn = $this->methodBindings[$method];
+        if (!is_callable($fn)) {
+            throw new \RuntimeException('Method binding not found for ' . $method);
+        }
+
+        return $fn($instance, $this);
     }
 
     /**
@@ -420,7 +428,7 @@ class Container implements \ArrayAccess, ContainerContract
     public function alias($abstract, $alias)
     {
         if ($alias === $abstract) {
-            throw new \LogicException('['.$abstract.'] is aliased to itself.');
+            throw new \LogicException('[' . $abstract . '] is aliased to itself.');
         }
 
         $this->aliases[$alias] = $abstract;
@@ -628,7 +636,7 @@ class Container implements \ArrayAccess, ContainerContract
         try {
             $reflector = new \ReflectionClass($concrete);
         } catch (\ReflectionException $e) {
-            throw new BindingResolutionException('Target class ['.$concrete.'] does not exist.', 0, $e);
+            throw new BindingResolutionException('Target class [' . $concrete . '] does not exist.', 0, $e);
         }
 
         // Verify if current abstract object is not instantiable.
@@ -702,7 +710,8 @@ class Container implements \ArrayAccess, ContainerContract
     protected function hasParameterOverride($dependency)
     {
         return array_key_exists(
-            $dependency->name, $this->getLastParameterOverride()
+            $dependency->name,
+            $this->getLastParameterOverride()
         );
     }
 
@@ -737,7 +746,7 @@ class Container implements \ArrayAccess, ContainerContract
      */
     protected function resolvePrimitive(\ReflectionParameter $parameter)
     {
-        if (!is_null($concrete = $this->getContextualConcrete('$'.$parameter->getName()))) {
+        if (!is_null($concrete = $this->getContextualConcrete('$' . $parameter->getName()))) {
             return $concrete instanceof \Closure ? $concrete($this) : $concrete;
         }
 
@@ -813,8 +822,8 @@ class Container implements \ArrayAccess, ContainerContract
     protected function rejectIfNotInstantiable($concrete)
     {
         $message = !empty($this->buildStack)
-            ? 'Target ['.$concrete.'] is not instantiable while building ['.implode(', ', $this->buildStack).'].'
-            : 'Target ['.$concrete.'] is not instantiable.';
+            ? 'Target [' . $concrete . '] is not instantiable while building [' . implode(', ', $this->buildStack) . '].'
+            : 'Target [' . $concrete . '] is not instantiable.';
 
         throw new \RuntimeException($message, 100);
     }
@@ -828,7 +837,7 @@ class Container implements \ArrayAccess, ContainerContract
      */
     protected function unresolvablePrimitive(\ReflectionParameter $parameter)
     {
-        $message = 'Unresolvable dependency resolving ['.$parameter.'] in class '.$parameter->getDeclaringClass()->getName();
+        $message = 'Unresolvable dependency resolving [' . $parameter . '] in class ' . $parameter->getDeclaringClass()->getName();
 
         throw new \RuntimeException($message);
     }
@@ -918,7 +927,7 @@ class Container implements \ArrayAccess, ContainerContract
     /**
      * Add instance to container singleton.
      *
-     * @param \Swilen\Shared\Container\Container $instance
+     * @param \Swilen\Shared\Container\Container|null $instance
      *
      * @return \Swilen\Shared\Container\Container
      */

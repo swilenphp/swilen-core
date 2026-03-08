@@ -19,11 +19,11 @@ use Swilen\Wp\Hooks\WpHookEvent;
 // ============================================================================
 
 if (!defined('WP_PLUGIN_DIR')) {
-    define('WP_PLUGIN_DIR', base_path('plugins'));
+    define('WP_PLUGIN_DIR', WP_CONTENT_DIR . '/plugins');
 }
 
 if (!defined('WPMU_PLUGIN_DIR')) {
-    define('WPMU_PLUGIN_DIR', base_path('mu-plugins'));
+    define('WPMU_PLUGIN_DIR', WP_CONTENT_DIR . '/mu-plugins');
 }
 
 /**

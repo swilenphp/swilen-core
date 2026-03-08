@@ -3,12 +3,15 @@
 namespace Swilen\Arthropod;
 
 use Swilen\Arthropod\Contract\ExceptionHandler;
+use Swilen\Arthropod\Exception\Handler;
+use Swilen\Cache\Cache;
 use Swilen\Container\Container;
 use Swilen\Events\Dispatcher;
 use Swilen\Events\EventDispatcher;
 use Swilen\Http\Request;
 use Swilen\Petiole\Facade;
 use Swilen\Pipeline\Pipeline;
+use Swilen\Routing\Router;
 use Swilen\Routing\RoutingServiceProvider;
 use Swilen\Shared\Arthropod\Application as ArthropodApplication;
 use Swilen\Shared\Arthropod\HttpApplication;
@@ -114,6 +117,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     protected $environmentFile;
 
+
     /**
      * Create http aplication instance.
      *
@@ -128,7 +132,8 @@ class Application extends Container implements ArthropodApplication, HttpApplica
         $this->registerServiceProviders();
         $this->registerCoreContainerAliases();
 
-        $this->instance(EventDispatcher::class, new EventDispatcher());
+        $this->singleton(EventDispatcher::class, EventDispatcher::class);
+        $this->singleton(Cache::class, Cache::class);
     }
 
     /**
@@ -539,6 +544,8 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     public function handle(Request $request)
     {
+        $this->bootstrap();
+
         try {
             $response = $this->dispatchRequestThroughRouter($request);
         } catch (\Throwable $e) {
@@ -562,8 +569,6 @@ class Application extends Container implements ArthropodApplication, HttpApplica
         $this->instance('request', $request);
 
         Facade::flushFacadeInstance('request');
-
-        $this->bootstrap();
 
         return (new Pipeline($this))
             ->from($request)
@@ -609,6 +614,9 @@ class Application extends Container implements ArthropodApplication, HttpApplica
                 'app' => \Swilen\Arthropod\Application::class,
                 'request' => \Swilen\Http\Request::class,
                 'response' => \Swilen\Http\Response::class,
+                'router' => \Swilen\Routing\Router::class,
+                'cache' => \Swilen\Cache\Cache::class,
+                'events' => \Swilen\Events\EventDispatcher::class,
             ] as $key => $value
         ) {
             $this->alias($key, $value);

@@ -1,5 +1,7 @@
 <?php
 
+use Swilen\Routing\Router;
+
 define('SWILEN_START', microtime(true));
 
 /*
@@ -18,8 +20,20 @@ $app = new Swilen\Arthropod\Application(
     $_ENV['SWILEN_BASE_URL'] ?? dirname(__DIR__)
 );
 
-$app->make('router')->get('/', function () {
-    return 'Hello World';
+/*
+|--------------------------------------------------------------------------
+| Register exception handler
+|--------------------------------------------------------------------------
+*/
+$app->singleton(
+    \Swilen\Arthropod\Contract\ExceptionHandler::class,
+    \Swilen\Arthropod\Exception\Handler::class
+);
+
+$app->get(Router::class)->get('/', function () {
+    return response()->json([
+        'message' => 'Hello World',
+    ]);
 });
 
 /*

@@ -11,8 +11,15 @@
         "files": [
             "src/Arthropod/helpers.php",
             "src/Shared/functions.php",
+            "src/Wp/wp-constants.php",
             "src/Wp/Hooks/functions.php",
-            "src/Wp/Plugins/functions.php"
+            "src/Wp/Plugins/functions.php",
+            "src/Wp/Utilities/functions.php",
+            "src/Wp/Escaping/functions.php",
+            "src/Wp/Sanitization/functions.php",
+            "src/Wp/Url/functions.php",
+            "src/Wp/ScriptStyle/functions.php",
+            "src/Wp/Rest/functions.php"
         ]
     },
     "authors": [
@@ -44,6 +51,7 @@
         }
     },
     "scripts": {
+        "dev": "php -S localhost:7050 -t public",
         "test": "./vendor/bin/pest",
         "test:unit": "./vendor/bin/pest --group unit",
         "test:integration": "./vendor/bin/pest --group integration",
