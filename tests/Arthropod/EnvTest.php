@@ -27,80 +27,80 @@ it('Generate error when file does not exist and when using an empty constructor'
 it('Config env instance', function () {
     $instance = new Env();
 
-    expect($instance->filename())->toBe('.env');
-    expect($instance->path())->toBeNull();
-    expect($instance->environmentFilePath())->toBe(DIRECTORY_SEPARATOR.'.env');
-    expect($instance->isInmutable())->toBeTrue();
+    expectt($instance->filename())->toBe('.env');
+    expectt($instance->path())->toBeNull();
+    expectt($instance->environmentFilePath())->toBe(DIRECTORY_SEPARATOR . '.env');
+    expectt($instance->isImmutable())->toBeTrue();
 
     $instance = $instance->config([
         'file' => '.env',
         'path' => __DIR__,
-        'inmutable' => false,
+        'immutable' => false,
     ]);
 
-    expect($instance->filename())->toBe('.env');
-    expect($instance->path())->toBe(__DIR__);
-    expect($instance->environmentFilePath())->toBe(__DIR__.DIRECTORY_SEPARATOR.'.env');
-    expect($instance->isInmutable())->toBeFalse();
+    expectt($instance->filename())->toBe('.env');
+    expectt($instance->path())->toBe(__DIR__);
+    expectt($instance->environmentFilePath())->toBe(__DIR__ . DIRECTORY_SEPARATOR . '.env');
+    expectt($instance->isImmutable())->toBeFalse();
 
     unset($instance);
 });
 
 it('Skip comment per line', function () {
-    expect(Env::get('PREV_COMMENT'))->toBeTrue();
-    expect(Env::get('NEXT_COMMNET'))->toBe('OK');
+    expectt(Env::get('PREV_COMMENT'))->toBeTrue();
+    expectt(Env::get('NEXT_COMMNET'))->toBe('OK');
 });
 
 it('Commnet in line is ignored', function () {
     Env::getInstance()->set('COMMNET_IGNORED', 'COMPILE {NEXT_COMMNET} #COMMNET INLINE');
 
-    expect(Env::get('COMMNET_IGNORED'))->toBe('COMPILE OK');
+    expectt(Env::get('COMMNET_IGNORED'))->toBe('COMPILE OK');
 });
 
 it('The variable is expected to return null if it is not found in the file', function () {
-    expect(Env::get('TEST_NULL_ENV'))->toBeNull();
+    expectt(Env::get('TEST_NULL_ENV'))->toBeNull();
 });
 
 it('Expect a empty string if not found env variable in file', function () {
-    expect(Env::get('TEST_EMPTY_ENV', ''))->toBeEmpty();
+    expectt(Env::get('TEST_EMPTY_ENV', ''))->toBeEmpty();
 });
 
 it('Return default variable when env is not defined', function () {
-    expect(Env::get('TEST_ENV', '__default'))->toBe('__default');
+    expectt(Env::get('TEST_ENV', '__default'))->toBe('__default');
 });
 
 it('Return variable if exists', function () {
-    expect(Env::get('BASE_URL'))->toBe('http://localhost:8080');
+    expectt(Env::get('BASE_URL'))->toBe('http://localhost:8080');
 });
 
 it('Replace variable in env var has found', function () {
-    expect(Env::get('EXTEND_URL'))->toBe('http://localhost:8080/api');
+    expectt(Env::get('EXTEND_URL'))->toBe('http://localhost:8080/api');
 });
 
 it('Insert enviroment variable in runtime', function () {
     Env::set('APP_DEBUGGER', false);
 
-    expect(Env::get('APP_DEBUGGER'))->toBeFalse();
+    expectt(Env::get('APP_DEBUGGER'))->toBeFalse();
 });
 
 it('Replace enviroment variable in runtime', function () {
     Env::set('APP_BOOL', 'Hello');
     Env::set('APP_HELLO', '{APP_BOOL} World!');
 
-    expect(Env::get('APP_HELLO'))->toBe('Hello World!');
+    expectt(Env::get('APP_HELLO'))->toBe('Hello World!');
 });
 
 it('Replace existing enviroment variable in runtime', function () {
     Env::replace('APP_DEBUG', true);
 
-    expect(Env::get('APP_DEBUG'))->toBeTrue();
+    expectt(Env::get('APP_DEBUG'))->toBeTrue();
 });
 
 it('Replace All variables founded', function () {
     $uri = 'http://localhost:8080/api/v1/testing';
 
-    expect(Env::get('NESTED_URI'))->toBe($uri);
-    expect($_ENV['NESTED_URI'])->toBe($uri);
+    expectt(Env::get('NESTED_URI'))->toBe($uri);
+    expectt($_ENV['NESTED_URI'])->toBe($uri);
 });
 
 it('Compile value, put to env collection with same value when placedolders not found in stack', function () {
@@ -108,7 +108,7 @@ it('Compile value, put to env collection with same value when placedolders not f
 
     Env::getInstance()->compile('NESTED_VALUE', $value);
 
-    expect($_ENV['NESTED_VALUE'])->toBe($value);
+    expectt($_ENV['NESTED_VALUE'])->toBe($value);
 });
 
 it('Compile value, put to env collection with same value because not force replaced existing variables in collection', function () {
@@ -119,7 +119,7 @@ it('Compile value, put to env collection with same value because not force repla
 
     Env::getInstance()->compile('NESTED_VALUE', $value);
 
-    expect($_ENV['NESTED_VALUE'])->toBe($value);
+    expectt($_ENV['NESTED_VALUE'])->toBe($value);
 });
 
 it('Compile value, put to env collection with replaced value because is force replaced existing variables in collection', function () {
@@ -130,56 +130,55 @@ it('Compile value, put to env collection with replaced value because is force re
 
     Env::getInstance()->compile('NESTED_VALUE', $value, true);
 
-    expect($_ENV['NESTED_VALUE'])->toBe('Variables replaced with replaced and nothing');
+    expectt($_ENV['NESTED_VALUE'])->toBe('Variables replaced with replaced and nothing');
 });
 
 it('App secret decoded succesfully as Swilen', function () {
     Env::set('APP_KEYED', 'swilen:NzMxYTA2MjM3YzM5ZGFhYzQyM2I5N2E4NWZmOTI3Yzc');
 
-    expect(Env::get('APP_KEYED'))->toBe('731a06237c39daac423b97a85ff927c7');
+    expectt(Env::get('APP_KEYED'))->toBe('731a06237c39daac423b97a85ff927c7');
 });
 
 it('App secret decoded successfuly as base64', function () {
     Env::set('APP_KEYED_64', 'base64:NzMxYTA2MjM3YzM5ZGFhYzQyM2I5N2E4NWZmOTI3Yzc=');
 
-    expect(Env::get('APP_KEYED_64'))->toBe('731a06237c39daac423b97a85ff927c7');
+    expectt(Env::get('APP_KEYED_64'))->toBe('731a06237c39daac423b97a85ff927c7');
 
     Env::getInstance()->forget();
 });
 
 it('Transform values to primitive', function () {
-    $env = Env::createFrom(__DIR__.'/__fixtures__')->config([
+    $env = Env::createFrom(__DIR__ . '/__fixtures__')->config([
         'file' => '.env.primitives',
     ])->load();
 
-    expect(Env::get('PRIMITIVE_TRUE'))->toBeTrue();
-    expect(Env::get('STRING_TRUE'))->toBeTrue();
-    expect(Env::get('NUMBER_TRUE'))->toBeTrue();
-    expect(Env::get('SHORT_CIRCUIT_TRUE'))->toBeTrue();
+    expectt(Env::get('PRIMITIVE_TRUE'))->toBeTrue();
+    expectt(Env::get('STRING_TRUE'))->toBeTrue();
+    expectt(Env::get('SHORT_CIRCUIT_TRUE'))->toBeTrue();
 
-    expect(Env::get('PRIMITIVE_FALSE'))->toBeFalse();
-    expect(Env::get('STRING_FALSE'))->toBeFalse();
-    expect(Env::get('NUMBER_FALSE'))->toBeFalse();
-    expect(Env::get('SHORT_CIRCUIT_FALSE'))->toBeFalse();
+    expectt(Env::get('PRIMITIVE_FALSE'))->toBeFalse();
+    expectt(Env::get('STRING_FALSE'))->toBeFalse();
+    expectt(Env::get('SHORT_CIRCUIT_FALSE'))->toBeFalse();
 
-    expect(Env::get('PRIMITIVE_NUMBER'))->toBeInt();
-    expect(Env::get('STRING_NUMBER'))->toBeString();
-    expect(Env::get('SIGN_NUMBER'))->toBeString();
+    expectt(Env::get('PRIMITIVE_NUMBER'))->toBeInt();
+    expectt(Env::get('STRING_NUMBER'))->toBeString();
+    expectt(Env::get('SIGN_NUMBER'))->toBeInt();
+    expectt(Env::get('FLOAT_NUMBER'))->toBeFloat();
 
-    expect(Env::get('PRIMITIVE_NULL'))->toBeNull();
-    expect(Env::get('EMPTY_NULL'))->toBeNull();
-    expect(Env::get('STRING_NULL'))->toBeNull();
+    expectt(Env::get('PRIMITIVE_NULL'))->toBeNull();
+    expectt(Env::get('EMPTY_NULL'))->toBeNull();
+    expectt(Env::get('STRING_NULL'))->toBeNull();
 
     Env::getInstance()->forget();
 });
 
 it('Remove all resolved variables and forget env instance', function () {
-    Env::createFrom(__DIR__.'/__fixtures__')->config([
+    Env::createFrom(__DIR__ . '/__fixtures__')->config([
         'file' => '.env.primitives',
     ])->load();
 
     Env::getInstance()->forget();
 
-    expect(Env::registered())->toBeEmpty();
-    expect(Env::stack())->toBeEmpty();
+    expectt(Env::registered())->toBeEmpty();
+    expectt(Env::stack())->toBeEmpty();
 });

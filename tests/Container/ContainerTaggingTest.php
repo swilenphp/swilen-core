@@ -18,28 +18,28 @@ it('Tagging concrete implementations', function () {
     /** @var \ArrayIterator<PerformaceReportStub> */
     $tagged = $this->container->tagged(PerformaceReportStub::class);
 
-    expect($tagged)->toBeIterable();
+    expectt($tagged)->toBeIterable();
 
     $results = [];
     foreach ($tagged as $key => $value) {
         $results[$key] = $value;
     }
 
-    expect($tagged->count())->toBe(2);
-    expect($results[0])->toBeInstanceOf(PerformaceReportStub::class);
-    expect($results[0])->toBeInstanceOf(MemoryReportTaggedStub::class);
-    expect($results[1])->toBeInstanceOf(CpuReportTaggedStub::class);
+    expectt($tagged->count())->toBe(2);
+    expectt($results[0])->toBeInstanceOf(PerformaceReportStub::class);
+    expectt($results[0])->toBeInstanceOf(MemoryReportTaggedStub::class);
+    expectt($results[1])->toBeInstanceOf(CpuReportTaggedStub::class);
 
     $reports = [];
     foreach ($tagged as $key => $value) {
         $reports[$key] = $value->report();
     }
 
-    expect($reports)->toBe([20, 60]);
+    expectt($reports)->toBe([20, 60]);
 });
 
 it('Empty when is not found tag into container', function () {
-    expect($this->container->tagged('not-found'))->toBeEmpty();
+    expectt($this->container->tagged('not-found'))->toBeEmpty();
 });
 
 interface PerformaceReportStub

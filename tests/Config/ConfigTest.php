@@ -12,12 +12,12 @@ it('Configuration repository', function () {
         ],
     ]);
 
-    expect($config)->toBeInstanceOf(ConfigRepository::class);
+    expectt($config)->toBeInstanceOf(ConfigRepository::class);
 
-    expect($config->get('nested.key'))->toBe(20);
-    expect($config->get('config.not', '__default'))->toBe('__default');
-    expect($config->has('nothing'))->toBeFalse();
-    expect($config->has('nested'))->toBeTrue();
+    expectt($config->get('nested.key'))->toBe(20);
+    expectt($config->get('config.not', '__default'))->toBe('__default');
+    expectt($config->has('nothing'))->toBeFalse();
+    expectt($config->has('nested'))->toBeTrue();
 });
 
 it('Config manage values in runtime', function () {
@@ -27,17 +27,17 @@ it('Config manage values in runtime', function () {
         ],
     ]);
 
-    expect($config->all())->toHaveCount(1);
+    expectt($config->all())->toHaveCount(1);
 
     $config->set('bar', 'fo');
 
-    expect($config->all())->toHaveCount(2);
-    expect($config->get('bar'))->toBe('fo');
+    expectt($config->all())->toHaveCount(2);
+    expectt($config->get('bar'))->toBe('fo');
 
     $config->push('nested', 25);
 
-    expect($config->all())->toHaveCount(2);
-    expect($config->get('nested'))->toBe(['key' => 20, 25]);
+    expectt($config->all())->toHaveCount(2);
+    expectt($config->get('nested'))->toBe(['key' => 20, 25]);
 });
 
 it('Config get many values from a key', function () {
@@ -47,19 +47,19 @@ it('Config get many values from a key', function () {
         ],
     ]);
 
-    expect($config->getMany(['nested']))->toBe([
+    expectt($config->getMany(['nested']))->toBe([
         'nested' => [
             'key' => 20,
         ],
     ]);
 
-    expect($config->getMany('nested'))->toBe([
+    expectt($config->getMany('nested'))->toBe([
         'nested' => [
             'key' => 20,
         ],
     ]);
 
-    expect($config->getMany('empty'))->toBe(['empty' => null]);
+    expectt($config->getMany('empty'))->toBe(['empty' => null]);
 });
 
 it('Interact with config instance as array', function () {
@@ -69,18 +69,18 @@ it('Interact with config instance as array', function () {
         ],
     ]);
 
-    expect($config->all())->toHaveCount(1);
+    expectt($config->all())->toHaveCount(1);
 
     $config['other.value'] = true;
 
-    expect($config->all())->toHaveCount(2);
-    expect($config['other.value'])->toBeTrue();
+    expectt($config->all())->toHaveCount(2);
+    expectt($config['other.value'])->toBeTrue();
 
-    expect(isset($config['other']))->toBeTrue();
-    expect(isset($config['nothing']))->toBeFalse();
+    expectt(isset($config['other']))->toBeTrue();
+    expectt(isset($config['nothing']))->toBeFalse();
 
     unset($config['other']);
 
-    expect($config->all())->toHaveCount(2);
-    expect($config['other'])->toBeNull();
+    expectt($config->all())->toHaveCount(2);
+    expectt($config['other'])->toBeNull();
 });

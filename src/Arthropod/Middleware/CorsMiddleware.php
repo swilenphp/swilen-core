@@ -3,7 +3,7 @@
 namespace Swilen\Arthropod\Middleware;
 
 use Swilen\Container\Container;
-use Swilen\Http\Common\Http;
+use Swilen\Http\Common\Method;
 use Swilen\Http\Request;
 use Swilen\Http\Response;
 
@@ -73,7 +73,7 @@ class CorsMiddleware
      */
     protected function isPreflightRequest(Request $request)
     {
-        return $request->getMethod() === Http::METHOD_OPTIONS &&
+        return $request->getMethod() === Method::OPTIONS &&
             $request->headers->has('Access-Control-Request-Method');
     }
 

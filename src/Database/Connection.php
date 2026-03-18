@@ -91,7 +91,7 @@ class Connection implements ConnectionContract
     public function getPdo()
     {
         if ($this->pdo === null) {
-            return $this->pdo = call_user_func($this->resolver, $this);
+            return $this->pdo = ($this->resolver)($this);
         }
 
         return $this->pdo;
@@ -262,7 +262,10 @@ class Connection implements ConnectionContract
             $result = $this->runQueryCallback($query, $bindings, $callback);
         } catch (QueryException $e) {
             $result = $this->tryAgainIfCausedByLostConnection(
-                $e, $query, $bindings, $callback
+                $e,
+                $query,
+                $bindings,
+                $callback
             );
         }
 
@@ -418,7 +421,7 @@ class Connection implements ConnectionContract
      */
     protected function reconnectIfMissingConnection()
     {
-        if (is_null($this->pdo)) {
+        if ($this->pdo === null) {
             $this->reconnect();
         }
     }

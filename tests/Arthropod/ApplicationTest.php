@@ -25,6 +25,9 @@ beforeEach(function () {
      */
     $app = Application::getInstance();
 
+    /**
+     * @var mixed $this
+     */
     $this->app = $app;
 });
 
@@ -40,12 +43,12 @@ it('The application started successfully and your instance is correct', function
      */
     $app = $this->app;
 
-    expect($app)->toBeInstanceOf(Application::class);
-    expect($app)->toBeInstanceOf(ArthropodApplication::class);
-    expect($app)->toBeInstanceOf(Container::class);
-    expect($app)->toBeObject();
-    expect($app->hasBeenBootstrapped())->toBeFalse();
-    expect($app->isBooted())->toBeFalse();
+    expectt($app)->toBeInstanceOf(Application::class);
+    expectt($app)->toBeInstanceOf(ArthropodApplication::class);
+    expectt($app)->toBeInstanceOf(Container::class);
+    expectt($app)->toBeObject();
+    expectt($app->hasBeenBootstrapped())->toBeFalse();
+    expectt($app->isBooted())->toBeFalse();
 });
 
 it('Interact with application paths and files', function () {
@@ -53,34 +56,34 @@ it('Interact with application paths and files', function () {
 
     $app = new Application($directory);
 
-    expect($app->environmentFile())->toBe('.env');
+    expectt($app->environmentFile())->toBe('.env');
 
     $app->useEnvironmentFile('.env.example');
-    expect($app->environmentFile())->toBe('.env.example');
+    expectt($app->environmentFile())->toBe('.env.example');
 
-    expect($app->environmentPath())->toBe($directory);
+    expectt($app->environmentPath())->toBe($directory);
     $app->useEnvironmentPath('/test');
-    expect($app->environmentPath())->toBe('/test');
+    expectt($app->environmentPath())->toBe('/test');
 });
 
 it('Application is developent mode', function () {
     $app = new Application(dirname(__DIR__));
 
-    expect($app->isDevelopmentMode())->toBeFalse();
+    expectt($app->isDevelopmentMode())->toBeFalse();
 
     $app->useEnvironment('development');
 
-    expect($app->isDevelopmentMode())->toBeTrue();
+    expectt($app->isDevelopmentMode())->toBeTrue();
 });
 
 it('Flush application instance', function () {
     $app = new Application(dirname(__DIR__));
 
-    expect(count($app->bindings()))->toBeGreaterThanOrEqual(2);
+    expectt(count($app->bindings()))->toBeGreaterThanOrEqual(2);
 
     $app->flush();
 
-    expect($app->bindings())->toBeEmpty();
+    expectt($app->bindings())->toBeEmpty();
 
     unset($app);
 });

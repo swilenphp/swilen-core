@@ -3,8 +3,6 @@
 use Swilen\Arthropod\Application;
 use Swilen\Arthropod\Env;
 use Swilen\Cache\Cache;
-use Swilen\Container\Container;
-use Swilen\Events\Dispatcher;
 use Swilen\Events\EventDispatcher;
 use Swilen\Routing\Contract\ResponseFactory;
 

@@ -4,9 +4,9 @@ use Swilen\Container\Container;
 use Swilen\Petiole\Facade;
 use Swilen\Security\Contract\JwtService;
 use Swilen\Security\Exception\JwtDomainException;
-use Swilen\Security\Token\Jwt;
-use Swilen\Security\Token\JwtSignedExpression;
-use Swilen\Security\Token\Payload;
+use Swilen\Security\Jwt\Jwt;
+use Swilen\Security\Jwt\JwtSignedExpression;
+use Swilen\Security\Jwt\Payload;
 
 uses()->group('Security', 'Token');
 
@@ -37,8 +37,8 @@ afterAll(function () {
 it('Create new token instance from token manager as singleton', function () {
     $tokenManager = $this->container[JwtService::class];
 
-    expect($tokenManager)->toBeInstanceOf(Jwt::class);
-    expect($tokenManager)->toBeInstanceOf(JwtService::class);
+    expectt($tokenManager)->toBeInstanceOf(Jwt::class);
+    expectt($tokenManager)->toBeInstanceOf(JwtService::class);
 });
 
 it('Create token signature from token manager', function () {
@@ -51,15 +51,15 @@ it('Create token signature from token manager', function () {
         'role' => 'admin',
     ]);
 
-    expect($token)->toBeInstanceOf(JwtSignedExpression::class);
-    expect($token->plainTextToken)->toBeString();
-    expect($token->payload->expires())->toBeNumeric();
+    expectt($token)->toBeInstanceOf(JwtSignedExpression::class);
+    expectt($token->plainTextToken)->toBeString();
+    expectt($token->payload->expires())->toBeNumeric();
 
     $decoded = $manager->verify($token->__toString());
 
-    expect($decoded)->toBeInstanceOf(Payload::class);
-    expect($decoded->data())->toBeArray();
-    expect($decoded->expires())->toBeNumeric();
+    expectt($decoded)->toBeInstanceOf(Payload::class);
+    expectt($decoded->data())->toBeArray();
+    expectt($decoded->expires())->toBeNumeric();
 });
 
 it('Facade is correct resolved', function () {
@@ -69,15 +69,15 @@ it('Facade is correct resolved', function () {
         'role' => 'admin',
     ]);
 
-    expect($token)->toBeInstanceOf(JwtSignedExpression::class);
-    expect($token->plainTextToken)->toBeString();
-    expect($token->payload->expires())->toBeNumeric();
+    expectt($token)->toBeInstanceOf(JwtSignedExpression::class);
+    expectt($token->plainTextToken)->toBeString();
+    expectt($token->payload->expires())->toBeNumeric();
 
     $decoded = JwtToken::verify($token->__toString());
 
-    expect($decoded)->toBeInstanceOf(Payload::class);
-    expect($decoded->data())->toBeArray()->toHaveKeys(['userId', 'username', 'role']);
-    expect($decoded->expires())->toBeNumeric();
+    expectt($decoded)->toBeInstanceOf(Payload::class);
+    expectt($decoded->data())->toBeArray()->toHaveKeys(['userId', 'username', 'role']);
+    expectt($decoded->expires())->toBeNumeric();
 });
 
 it('Throw error when alrgithm not is provide', function () {
@@ -91,8 +91,8 @@ it('Throw error when alrgithm not is provide', function () {
 })->throws(JwtDomainException::class, 'Missing algorithm.');
 
 /**
- * @method static \Swilen\Security\Token\JwtSignedExpression sign(array $payload, string $secret = null, string $algo = 'HS256')
- * @method static \Swilen\Security\Token\Payload             verify(string $token, $secret = null, ?string $algo = null)
+ * @method static \Swilen\Security\Jwt\JwtSignedExpression sign(array $payload, string $secret = null, string $algo = 'HS256')
+ * @method static \Swilen\Security\Jwt\Payload             verify(string $token, $secret = null, ?string $algo = null)
  */
 class JwtToken extends Facade
 {

@@ -3,6 +3,7 @@
 namespace Swilen\Http;
 
 use Swilen\Http\Common\Http;
+use Swilen\Http\Common\Method;
 use Swilen\Http\Common\SupportResponse;
 use Swilen\Http\Component\ResponseHeaderHunt;
 use Swilen\Http\Contract\ResponseContract;
@@ -86,10 +87,10 @@ class Response extends SupportResponse implements ResponseContract
             // Add the content-type and charset when not provided.
             $charset = $this->charset ?: 'utf-8';
             if (!$this->headers->has('Content-Type')) {
-                $this->headers->set('Content-Type', 'text/html; charset='.$charset);
+                $this->headers->set('Content-Type', 'text/html; charset=' . $charset);
             } elseif (stripos($mime = $this->headers->get('Content-Type', ''), 'text/') === 0 && !Str::contains($mime, 'charset')) {
                 // Add the charset
-                $this->headers->set('Content-Type', $mime.'; charset='.$charset);
+                $this->headers->set('Content-Type', $mime . '; charset=' . $charset);
             }
 
             // Fix Content-Length
@@ -98,7 +99,7 @@ class Response extends SupportResponse implements ResponseContract
             }
 
             // @see https://www.rfc-editor.org/rfc/rfc7231#section-4.3.2
-            if ($request->getMethod() === Http::METHOD_HEAD) {
+            if ($request->getMethod() === Method::HEAD->value) {
                 $this->setBody(null);
                 $this->headers->set('Content-Length', $this->headers->get('Content-Length'));
             }
@@ -171,7 +172,7 @@ class Response extends SupportResponse implements ResponseContract
     {
         if (headers_sent() === false) {
             $this->headers->each(function ($name, $value) {
-                header($name.':'.$value, strcasecmp($name, 'Content-Type') === 0, $this->statusCode);
+                header($name . ':' . $value, strcasecmp($name, 'Content-Type') === 0, $this->statusCode);
             });
 
             $this->sendStatusLine();
@@ -188,7 +189,9 @@ class Response extends SupportResponse implements ResponseContract
     protected function sendStatusLine()
     {
         header(
-            sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText), true, $this->statusCode
+            sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText),
+            true,
+            $this->statusCode
         );
     }
 

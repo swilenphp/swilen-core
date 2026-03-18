@@ -2,8 +2,6 @@
 
 namespace Swilen\Arthropod;
 
-use Swilen\Shared\Support\Str;
-
 final class Env
 {
 	/**
@@ -37,7 +35,7 @@ final class Env
 	/**
 	 * @var bool
 	 */
-	private $isInmutable = true;
+	private $isImmutable = true;
 
 	/**
 	 * The stack variables resolved.
@@ -57,27 +55,27 @@ final class Env
 	 * Create new env instance.
 	 *
 	 * @param string $path
-	 * @param bool   $isInmutable
+	 * @param bool   $isImmutable
 	 *
 	 * @return void
 	 */
-	public function __construct(string $path = null, bool $isInmutable = true)
+	public function __construct(?string $path = null, bool $isImmutable = true)
 	{
 		$this->path = $path;
-		$this->isInmutable = $isInmutable;
+		$this->isImmutable = $isImmutable;
 	}
 
 	/**
 	 * Create environment instance from given path.
 	 *
 	 * @param string $path
-	 * @param bool   $isInmutable
+	 * @param bool   $isImmutable
 	 *
 	 * @return $this
 	 */
-	public static function createFrom(string $path, bool $isInmutable = true)
+	public static function createFrom(string $path, bool $isImmutable = true)
 	{
-		return new static($path, $isInmutable);
+		return new static($path, $isImmutable);
 	}
 
 	/**
@@ -115,63 +113,71 @@ final class Env
 	 *
 	 * @return bool
 	 */
-	public function isInmutable()
+	public function isImmutable()
 	{
-		return (bool) $this->isInmutable;
+		return (bool) $this->isImmutable;
 	}
 
 	/**
-	 * Config the enviroment needed configuation.
+	 * Configure the environment manager instance.
 	 *
-	 * @param array $config
+	 * @param array{file?: string, path?: string, immutable?: bool} $config
 	 *
 	 * @return $this
 	 */
-	public function config(array $config)
+	public function config(array $config): self
 	{
-		$this->filename = $config['file'];
+		$this->filename = $config['file'] ?? $this->filename;
+		$this->path = $config['path'] ?? $this->path;
+		$this->isImmutable = (bool) ($config['immutable'] ?? $this->isImmutable);
 
-		if (isset($config['path'])) {
-			$this->path = $config['path'];
+		return $this;
+	}
+
+	/**
+	 * Load environment variables from a file.
+	 *
+	 * @throws RuntimeException If the file is missing or outside allowed path.
+	 */
+	public function load()
+	{
+		$filePath = $this->environmentFilePath();
+		if (!is_readable($filePath)) {
+			throw new \RuntimeException("Environment file [{$this->filename}] is not readable at [{$this->path}].");
 		}
 
-		if (isset($config['inmutable'])) {
-			$this->isInmutable = (bool) $config['inmutable'];
+		static::$instance = $this;
+		$lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+		if ($lines === false) {
+			throw new \RuntimeException("Environment file [{$this->filename}] is not readable at [{$this->path}].");
+		}
+
+		foreach ($lines as $line) {
+			$line = trim($line);
+			if (!$line || str_starts_with($line, '#')) {
+				continue;
+			}
+
+			[$key, $value] = str_contains($line, '=') ? explode('=', $line, 2) : [$line, null];
+			$this->compile($key, $value);
 		}
 
 		return $this;
 	}
 
 	/**
-	 * Load variables from defined path.
+	 * Load environment variables directly from an associative array.
+	 *
+	 * @param array<string, mixed> $data
 	 *
 	 * @return $this
 	 */
-	public function load()
+	public function loadFromArray(array $data): self
 	{
-		$path = $this->environmentFilePath();
-
-		$realPath = realpath(dirname($path));
-		if ($realPath === false || !Str::startsWith($realPath, realpath($this->path))) {
-			throw new \RuntimeException('Invalid environment file path');
-		}
-
-		if (!is_readable($path)) {
-			throw new \RuntimeException('Env file is not readable ' . $path);
-		}
-
 		static::$instance = $this;
-
-		$lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-		foreach ($lines as $line) {
-			if (strpos(trim($line), '#') === 0) {
-				continue;
-			}
-
-			$varline = explode('=', $line, 2);
-
-			$this->compile($varline[0], $varline[1] ?? null);
+		foreach ($data as $key => $value) {
+			$this->compile($key, $value);
 		}
 
 		return $this;
@@ -191,14 +197,17 @@ final class Env
 		$key = $this->formatKey($key);
 		$value = $this->formatValue($value);
 
+		// Store in stack for potential cross-variable resolution
 		self::$stack[$key] = $value;
 
-		if (preg_match_all('/\$?\{[A-Z0-9\_]+\}/', $value, $matches)) {
-			foreach ($matches[0] as $match) {
-				$name = $this->formatKey($match, '${\}');
-				$value = str_replace($match, $this->wrapStack($name, $match), $value);
-				self::$stack[$key] = $value;
-			}
+		// Resolve ${VAR} or {VAR} references
+		if (is_string($value) && str_contains($value, '{')) {
+			$value = preg_replace_callback('/\$?{[A-Z0-9\_]+}/', function ($matches) {
+				$key = $this->formatKey($matches[0], '${\}');
+				return (static::$stack[$key] ?? $matches[0]);
+			}, $value);
+
+			self::$stack[$key] = $value;
 		}
 
 		$this->write($key, $value, $replace);
@@ -212,7 +221,7 @@ final class Env
 	 *
 	 * @return string
 	 */
-	private function formatKey(string $key, string $replace = null)
+	private function formatKey(string $key, ?string $replace = null)
 	{
 		$key = $replace ? trim($key, $replace) : trim($key);
 
@@ -228,10 +237,12 @@ final class Env
 	 */
 	private function formatValue($value)
 	{
-		if (is_null($value)) {
-			return null;
+		// check value is primitive
+		if ($value === null || $value === true || $value === false || is_int($value) || is_float($value)) {
+			return $value;
 		}
 
+		// remove comment
 		if (($startComment = strpos($value, '#')) !== false) {
 			$value = trim(substr($value, 0, $startComment));
 		}
@@ -246,51 +257,46 @@ final class Env
 	 *
 	 * @return bool|int|string
 	 */
-	private function parseToPrimitive($value)
+	private function parseToPrimitive(string $value): mixed
 	{
-		if (in_array($value, [true, false, 1, 0], true)) {
-			return (bool) $value;
+		$len = strlen($value);
+		$quoted = false;
+
+		// Handle quoted strings
+		if ($len >= 2) {
+			$first = $value[0];
+			$last  = $value[$len - 1];
+
+			if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
+				$value = substr($value, 1, -1);
+				$quoted = true;
+			}
 		}
 
-		$primitive = str_replace(['"', '\''], '', $value);
-
-		if (in_array($value, [null, 'null', ''], true) || is_null($primitive)) {
-			return null;
-		}
-
-		if (in_array($primitive, ['true', '(true)', 'on', '1'], true)) {
-			return true;
-		}
-
-		if (in_array($primitive, ['false', '(false)', 'off', '0'], true)) {
-			return false;
-		}
-
-		if (is_numeric($primitive) && !Str::contains($value, ['+', '-', '"', '\''])) {
-			return (int) $primitive;
-		}
-
-		if (Str::startsWith($primitive, 'swilen:')) {
-			return (string) base64_decode(substr($primitive, 7) . '=');
-		}
-
-		if (Str::startsWith($primitive, 'base64:')) {
-			return (string) base64_decode(substr($primitive, 7));
-		}
-
-		return $primitive;
+		$lower = strtolower($value);
+		return match ($lower) {
+			'true', '(true)', 'on', 'yes' => true,
+			'false', '(false)', 'off', 'no' => false,
+			'null', '(null)', '' => null,
+			default => $this->parseComplexStrings($value, $quoted),
+		};
 	}
 
-	/**
-	 * Find key into env stack and return empty string if value not exists.
-	 *
-	 * @param string|int $key
-	 *
-	 * @return string
-	 */
-	private function wrapStack($key, $match)
+	private function parseComplexStrings(string $value, bool $quoted = false): mixed
 	{
-		return static::$stack[$key] ?? $match;
+		if (!$quoted && (is_numeric($value) || str_starts_with($value, '+') || str_starts_with($value, '-'))) {
+			return str_contains($value, '.') ? (float) $value : (int) $value;
+		}
+
+		if (str_starts_with($value, 'base64:')) {
+			return base64_decode(substr($value, 7));
+		}
+
+		if (str_starts_with($value, 'swilen:')) {
+			return base64_decode(substr($value, 7) . '=');
+		}
+
+		return $value;
 	}
 
 	/**
@@ -304,28 +310,13 @@ final class Env
 	 */
 	private function write(string $key, $value, bool $replace = false)
 	{
-		if (!$this->isInmutable() || $replace) {
-			return $this->writeMutableOrInmutable($key, $value);
+		if ($replace || !$this->isImmutable() || !$this->exists($key)) {
+			static::$envs[$key] = $value;
+			$_ENV[$key] = $value;
+			$_SERVER[$key] = $value;
+			// Clear store cache to force re-merge on next all() call
+			static::$store = [];
 		}
-
-		if (!$this->exists($key)) {
-			$this->writeMutableOrInmutable($key, $value);
-		}
-	}
-
-	/**
-	 * Write value to env collection, $_ENV and $_SERVER.
-	 *
-	 * @param string $key
-	 * @param mixed  $value
-	 *
-	 * @return void
-	 */
-	private function writeMutableOrInmutable(string $key, $value)
-	{
-		static::$envs[$key] = $value;
-		$_ENV[$key] = $value;
-		$_SERVER[$key] = $value;
 	}
 
 	/**
@@ -350,10 +341,10 @@ final class Env
 	 */
 	public static function get($key, $default = null)
 	{
-		$collection = static::all();
+		$all = static::all();
 
-		return key_exists($key, $collection)
-			? $collection[$key]
+		return key_exists($key, $all)
+			? $all[$key]
 			: $default;
 	}
 
@@ -369,16 +360,6 @@ final class Env
 		}
 
 		return static::$store = array_merge($_ENV, $_SERVER, static::$envs);
-	}
-
-	/**
-	 * Force refilling store collection.
-	 *
-	 * @return void
-	 */
-	private function refillingStore()
-	{
-		static::$store = array_merge($_ENV, $_SERVER, static::$envs);
 	}
 
 	/**
@@ -404,8 +385,6 @@ final class Env
 		$instance = static::getInstance();
 
 		$instance->compile($key, $value);
-
-		$instance->refillingStore();
 	}
 
 	/**
@@ -421,8 +400,6 @@ final class Env
 		$instance = static::getInstance();
 
 		$instance->compile($key, $value, true);
-
-		$instance->refillingStore();
 	}
 
 	/**
@@ -452,15 +429,10 @@ final class Env
 	 */
 	public static function forget()
 	{
-		static::$instance = null;
-
-		foreach (static::$envs as $key => $value) {
-			unset($_ENV[$key]);
-			unset($_SERVER[$key]);
+		foreach (array_keys(static::$envs) as $key) {
+			unset($_ENV[$key], $_SERVER[$key]);
 		}
-
-		static::$envs = [];
-		static::$store = [];
-		static::$stack = [];
+		static::$instance = null;
+		static::$envs = static::$store = static::$stack = [];
 	}
 }

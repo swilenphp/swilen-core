@@ -2,6 +2,8 @@
 
 namespace Swilen\Http;
 
+use Swilen\Http\Common\HttpCase;
+use Swilen\Http\Common\Method;
 use Swilen\Http\Common\SupportRequest;
 use Swilen\Http\Component\FileHunt;
 use Swilen\Http\Component\HeaderHunt;
@@ -167,7 +169,7 @@ class Request extends SupportRequest implements \ArrayAccess
      */
     public function withMethod(string $method)
     {
-        $this->method = strtoupper($method);
+        $this->method = HttpCase::uppercase($method);
         $this->server->set('REQUEST_METHOD', $this->method);
 
         return $this;
@@ -186,9 +188,9 @@ class Request extends SupportRequest implements \ArrayAccess
             return $this->method;
         }
 
-        $this->method = strtoupper($this->server->filter('REQUEST_METHOD', 'GET'));
+        $this->method = HttpCase::uppercase($this->server->filter('REQUEST_METHOD', 'GET'));
 
-        if ($this->method !== 'POST') {
+        if ($this->method !== Method::POST->value) {
             return $this->method;
         }
 
@@ -199,7 +201,7 @@ class Request extends SupportRequest implements \ArrayAccess
             return $this->method;
         }
 
-        $method = strtoupper(trim($method));
+        $method = HttpCase::uppercase(trim($method));
 
         if (!preg_match('/^[A-Z]+$/', $method)) {
             return $this->method;
@@ -221,7 +223,7 @@ class Request extends SupportRequest implements \ArrayAccess
      */
     public function getRealMethod()
     {
-        return strtoupper($this->server->filter('REQUEST_METHOD', 'GET'));
+        return HttpCase::uppercase($this->server->filter('REQUEST_METHOD', 'GET'));
     }
 
     /**
@@ -231,7 +233,7 @@ class Request extends SupportRequest implements \ArrayAccess
      */
     public function isMethod(string $method)
     {
-        return $this->getMethod() === strtoupper($method);
+        return $this->getMethod() === HttpCase::uppercase($method);
     }
 
     /**

@@ -24,10 +24,10 @@ it('Load environment file', function () {
 
     (new EnvironmentVars())->bootstrap($app);
 
-    expect($_SERVER['FOO'])->toBe('FOO');
-    expect($_ENV['FOO'])->toBe('FOO');
-    expect($_SERVER['BAR'])->toBe('BAR');
-    expect($_ENV['BAR'])->toBe('BAR');
+    expectt($_SERVER['FOO'])->toBe('FOO');
+    expectt($_ENV['FOO'])->toBe('FOO');
+    expectt($_SERVER['BAR'])->toBe('BAR');
+    expectt($_ENV['BAR'])->toBe('BAR');
 
     test()->expectOutputString('');
 });
@@ -51,11 +51,11 @@ it('Load custom environment instance', function () {
 
     (new EnvironmentVars())->bootstrap($app);
 
-    expect((object) $_SERVER)->not->toHaveKey('FOO');
-    expect((object) $_ENV)->not->toHaveKey('FOO');
+    expectt((object) $_SERVER)->not->toHaveKey('FOO');
+    expectt((object) $_ENV)->not->toHaveKey('FOO');
 
-    expect($_SERVER['CUSTOM'])->toBe('CUSTOM');
-    expect($_ENV['CUSTOM'])->toBe('CUSTOM');
+    expectt($_SERVER['CUSTOM'])->toBe('CUSTOM');
+    expectt($_ENV['CUSTOM'])->toBe('CUSTOM');
 
     test()->expectOutputString('');
 });
@@ -67,8 +67,8 @@ it('Load custom environment instance from factory', function () {
         ])->load();
     });
 
-    expect($_SERVER['CUSTOM'])->toBe('CUSTOM');
-    expect($_ENV['CUSTOM'])->toBe('CUSTOM');
+    expectt($_SERVER['CUSTOM'])->toBe('CUSTOM');
+    expectt($_ENV['CUSTOM'])->toBe('CUSTOM');
 
     Env::forget();
 

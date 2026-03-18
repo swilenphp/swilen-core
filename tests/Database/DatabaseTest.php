@@ -10,10 +10,10 @@ it('Resolve correct Connection instance', function () {
      */
     $connection = new Connection(getMockedPDO(), 'testing', []);
 
-    expect($connection->selectOne('SELECT * FROM testing'))->toBe('all');
-    expect($connection->select('SELECT * FROM testing'))->toBe(['TODO' => 'all']);
-    expect($connection->statement('SELECT * FROM testing'))->toBeTrue();
-    expect($connection->insert('INSERT INTO testing (name) VALUES (9)'))->toBe(1);
+    expectt($connection->selectOne('SELECT * FROM testing'))->toBe('all');
+    expectt($connection->select('SELECT * FROM testing'))->toBe(['TODO' => 'all']);
+    expectt($connection->statement('SELECT * FROM testing'))->toBeTrue();
+    expectt($connection->insert('INSERT INTO testing (name) VALUES (9)'))->toBe(1);
 });
 
 it('Prepare bindings', function () {
@@ -22,15 +22,15 @@ it('Prepare bindings', function () {
     $time = '2022-02-10 00:00:00';
 
     $prepared = $db->prepareBindings(['id' => 1, 'time' => new DateTime($time)]);
-    expect($prepared)->toBe(['id' => 1, 'time' => $time]);
+    expectt($prepared)->toBe(['id' => 1, 'time' => $time]);
 
     $staticTime = strtotime('2022-02-10 10:25:10');
 
     $prepared = $db->prepareBindings(['id' => 1, 'time' => date('Y-m-d', $staticTime)]);
-    expect($prepared)->toBe(['id' => 1, 'time' => '2022-02-10']);
+    expectt($prepared)->toBe(['id' => 1, 'time' => '2022-02-10']);
 
-    expect($db->prepareBindings(['active' => true]))->toBe(['active' => 1]);
-    expect($db->prepareBindings(['active' => false]))->toBe(['active' => 0]);
+    expectt($db->prepareBindings(['active' => true]))->toBe(['active' => 1]);
+    expectt($db->prepareBindings(['active' => false]))->toBe(['active' => 0]);
 });
 
 /**

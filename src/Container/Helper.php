@@ -26,7 +26,7 @@ final class Helper
 
         $name = $type->getName();
 
-        if (!is_null($class = $parameter->getDeclaringClass())) {
+        if ($class = $parameter->getDeclaringClass()) {
             if ($name === 'self') {
                 return $class->getName();
             }

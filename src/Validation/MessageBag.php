@@ -56,7 +56,8 @@ class MessageBag implements MessageBagContract
      */
     public function first($key, $format = null)
     {
-        if (is_null($messages = $this->get($key, $format))) {
+        $messages = $this->get($key, $format);
+        if ($messages === null) {
             return null;
         }
 

@@ -7,24 +7,24 @@ uses()->group('Routing', 'RoutingAction');
 it('Resolve uses action is closure', function () {
     $action = RouteAction::parse('/', InvokableTestingStub::class);
 
-    expect($action['uses'])->toBe(InvokableTestingStub::class.'@__invoke');
-    expect($action)->not->toHaveKey('controller');
+    expectt($action['uses'])->toBe(InvokableTestingStub::class . '@__invoke');
+    expectt($action)->not->toHaveKey('controller');
 
     $action = RouteAction::parse('/', function () {
         return 'closure';
     });
 
-    expect($action['uses'])->toBeCallable();
-    expect($action['uses']())->toBe('closure');
-    expect($action)->not->toHaveKey('controller');
+    expectt($action['uses'])->toBeCallable();
+    expectt($action['uses']())->toBe('closure');
+    expectt($action)->not->toHaveKey('controller');
 });
 
 it('Resolve uses action is controller', function ($actin) {
     $action = RouteAction::parse('/', $actin);
 
-    expect($action)->toHaveKeys(['controller', 'uses']);
-    expect($action['uses'])->toBe('MethodAllowedControllerStub@index');
-    expect($action['controller'])->toBe('MethodAllowedControllerStub@index');
+    expectt($action)->toHaveKeys(['controller', 'uses']);
+    expectt($action['uses'])->toBe('MethodAllowedControllerStub@index');
+    expectt($action['controller'])->toBe('MethodAllowedControllerStub@index');
 })->with([
     'array' => [[MethodAllowedControllerStub::class, 'index']],
     'string' => 'MethodAllowedControllerStub@index',
@@ -33,8 +33,8 @@ it('Resolve uses action is controller', function ($actin) {
 it('Throw uses action is null or empty', function ($actin) {
     $action = RouteAction::parse('/', $actin);
 
-    expect($action['uses'])->toBeCallable();
-    expect($action)->not->toHaveKey('controller');
+    expectt($action['uses'])->toBeCallable();
+    expectt($action)->not->toHaveKey('controller');
     call_user_func($action['uses']);
 })->with([
     'null' => null,

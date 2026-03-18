@@ -11,9 +11,9 @@ interface JwtService
      * @param string|null          $secret
      * @param string               $algo
      *
-     * @return \Swilen\Security\Token\JwtSignedExpression
+     * @return \Swilen\Security\Jwt\JwtSignedExpression
      */
-    public function sign(array $payload, $secret = null, string $algo = null);
+    public function sign(array $payload, $secret = null, ?string $algo = null);
 
     /**
      * Verify if token is valid.
@@ -22,7 +22,7 @@ interface JwtService
      * @param string|null $secret The secret key
      * @param string      $algo
      *
-     * @return \Swilen\Security\Token\Payload
+     * @return \Swilen\Security\Jwt\Payload
      */
-    public function verify(string $token, $secret = null, string $algo = null);
+    public function verify(string $token, $secret = null, ?string $algo = null);
 }

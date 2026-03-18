@@ -22,6 +22,18 @@
 |
 */
 
+if (!function_exists('expectt')) {
+    /**
+     * @param mixed $value
+     *
+     * @return \Pest\Expectation
+     */
+    function expectt($value)
+    {
+        return new \Pest\Expectation($value);
+    }
+}
+
 /*
 |--------------------------------------------------------------------------
 | Functions

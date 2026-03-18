@@ -2,6 +2,7 @@
 
 namespace Swilen\Database;
 
+use Swilen\Database\Drivers\MySQL\Connector;
 use Swilen\Petiole\ServiceProvider;
 
 class DatabaseServiceProvider extends ServiceProvider
@@ -17,7 +18,7 @@ class DatabaseServiceProvider extends ServiceProvider
             $config = $app->make('config')->get('database', []);
 
             return new Connection(function () use ($config) {
-                return (new MySqlConnector())->connect($config);
+                return (new Connector())->connect($config);
             }, $config['schema'] ?? '', $config);
         });
 

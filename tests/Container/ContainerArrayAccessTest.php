@@ -19,8 +19,8 @@ it('Array Access set binding', function () {
 
     $this->container['simple'] = false;
 
-    expect(isset($this->container['access']))->toBeTrue();
-    expect(isset($this->container['simple']))->toBeTrue();
+    expectt(isset($this->container['access']))->toBeTrue();
+    expectt(isset($this->container['simple']))->toBeTrue();
 });
 
 it('Array Access resolve binding', function () {
@@ -30,8 +30,8 @@ it('Array Access resolve binding', function () {
 
     $this->container['simple'] = false;
 
-    expect($this->container['access'])->toBeTrue();
-    expect($this->container['simple'])->toBeFalse();
+    expectt($this->container['access'])->toBeTrue();
+    expectt($this->container['simple'])->toBeFalse();
 });
 
 it('Array Access remove binding', function () {
@@ -41,11 +41,11 @@ it('Array Access remove binding', function () {
 
     $this->container['simple'] = false;
 
-    expect(isset($this->container['access'], $this->container['simple']))->toBeTrue();
+    expectt(isset($this->container['access'], $this->container['simple']))->toBeTrue();
 
     unset($this->container['access'], $this->container['simple']);
 
-    expect(isset($this->container['access'], $this->container['simple']))->toBeFalse();
+    expectt(isset($this->container['access'], $this->container['simple']))->toBeFalse();
 });
 
 it('Resolve the target when inserted into the container it is treated as an array with \ArrayAcces', function () {
@@ -62,5 +62,5 @@ it('Resolve the target when inserted into the container it is treated as an arra
         };
     };
 
-    expect($this->container->call($this->container['depend']))->toBeInt();
+    expectt($this->container->call($this->container['depend']))->toBeInt();
 });

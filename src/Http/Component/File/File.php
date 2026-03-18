@@ -34,7 +34,7 @@ class File extends \SplFileInfo implements Arrayable
      *
      * @return string
      */
-    public function move(string $directory, string $name = null)
+    public function move(string $directory, ?string $name = null)
     {
         $target = $this->getTargetFile($directory, $name);
         $error  = '';
@@ -76,7 +76,7 @@ class File extends \SplFileInfo implements Arrayable
      *
      * @return self
      */
-    public function getTargetFile(string $directory, string $name = null)
+    public function getTargetFile(string $directory, ?string $name = null)
     {
         if (!is_dir($directory)) {
             if (@mkdir($directory, 0777, true) === false && !is_dir($directory)) {
@@ -86,7 +86,7 @@ class File extends \SplFileInfo implements Arrayable
             throw new FileException(sprintf('Unable to write in the "%s" directory.', $directory));
         }
 
-        $target = rtrim($directory, '/\\').\DIRECTORY_SEPARATOR.($name === null ? $this->getBasename() : $this->normalizedFilename($name));
+        $target = rtrim($directory, '/\\') . \DIRECTORY_SEPARATOR . ($name === null ? $this->getBasename() : $this->normalizedFilename($name));
 
         return new self($target, false);
     }

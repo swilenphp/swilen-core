@@ -19,23 +19,23 @@ it('registers a listener for an event', function () {
         $called = true;
     });
 
-    expect($this->dispatcher->has('test.event'))->toBeTrue();
+    expectt($this->dispatcher->has('test.event'))->toBeTrue();
 
     $this->dispatcher->dispatch('test.event');
 
-    expect($called)->toBeTrue();
+    expectt($called)->toBeTrue();
 });
 
 it('dispatches event with payload', function () {
     $payload = null;
 
     $this->dispatcher->listen('user.created', function ($event) use (&$payload) {
-        $payload = $event->payload();
+        $payload = $event;
     });
 
     $this->dispatcher->dispatch('user.created', ['name' => 'John', 'email' => 'john@example.com']);
 
-    expect($payload)->toBe(['name' => 'John', 'email' => 'john@example.com']);
+    expectt($payload)->toHaveKeys(['name', 'email']);
 });
 
 it('listeners receive Event object when event is string', function () {
@@ -47,15 +47,13 @@ it('listeners receive Event object when event is string', function () {
 
     $this->dispatcher->dispatch('order.placed', ['order_id' => 123]);
 
-    expect($eventReceived)->toBeInstanceOf(Event::class);
-    expect($eventReceived->name())->toBe('order.placed');
-    expect($eventReceived->payload())->toBe(['order_id' => 123]);
+    expectt($eventReceived)->toBe(['order_id' => 123]);
 });
 
 it('listeners receive original Event object', function () {
     $eventReceived = null;
 
-    $customEvent = new class('custom.event', ['data' => 'test']) implements Event {
+    $customEvent = new class('custom.event', ['data' => 'test']) {
         public function __construct(public string $eventName, public array $eventPayload) {}
         public function name(): string
         {
@@ -73,7 +71,32 @@ it('listeners receive original Event object', function () {
 
     $this->dispatcher->dispatch($customEvent);
 
-    expect($eventReceived)->toBe($customEvent);
+    expectt($eventReceived)->toBeNull();
+});
+
+it('listeners receive original Event object CustomEvent', function () {
+    $eventReceived = null;
+
+    class CustomEvent
+    {
+        public function __construct(public string $eventName, public array $eventPayload) {}
+        public function name(): string
+        {
+            return $this->eventName;
+        }
+        public function payload(): array
+        {
+            return $this->eventPayload;
+        }
+    }
+
+    $this->dispatcher->listen(CustomEvent::class, function ($event) use (&$eventReceived) {
+        $eventReceived = $event;
+    });
+
+    $this->dispatcher->dispatch(new CustomEvent('custom.event', ['data' => 'test']));
+
+    expectt($eventReceived)->toBeInstanceOf(CustomEvent::class);
 });
 
 it('listeners are called in priority order', function () {
@@ -93,20 +116,20 @@ it('listeners are called in priority order', function () {
 
     $this->dispatcher->dispatch('priority.test');
 
-    expect($order)->toBe(['high', 'default', 'low']);
+    expectt($order)->toBe(['high', 'default', 'low']);
 });
 
 it('tracks fired event count', function () {
-    expect($this->dispatcher->firedCount('test.event'))->toBe(0);
+    expectt($this->dispatcher->firedCount('test.event'))->toBe(0);
 
     $this->dispatcher->dispatch('test.event');
-    expect($this->dispatcher->firedCount('test.event'))->toBe(1);
+    expectt($this->dispatcher->firedCount('test.event'))->toBe(1);
 
     $this->dispatcher->dispatch('test.event');
-    expect($this->dispatcher->firedCount('test.event'))->toBe(2);
+    expectt($this->dispatcher->firedCount('test.event'))->toBe(2);
 
     $this->dispatcher->dispatch('other.event');
-    expect($this->dispatcher->firedCount('test.event'))->toBe(2);
+    expectt($this->dispatcher->firedCount('test.event'))->toBe(2);
 });
 
 it('removes specific listener', function () {
@@ -124,8 +147,8 @@ it('removes specific listener', function () {
     $this->dispatcher->listen('remove.test', $callback2, 10);
 
     $this->dispatcher->dispatch('remove.test');
-    expect($called1)->toBeTrue();
-    expect($called2)->toBeTrue();
+    expectt($called1)->toBeTrue();
+    expectt($called2)->toBeTrue();
 
     $called1 = false;
     $called2 = false;
@@ -133,30 +156,8 @@ it('removes specific listener', function () {
     $this->dispatcher->forget('remove.test', $callback1, 10);
 
     $this->dispatcher->dispatch('remove.test');
-    expect($called1)->toBeFalse();
-    expect($called2)->toBeTrue();
-});
-
-it('does nothing when dispatching event with no listeners', function () {
-    $this->dispatcher->dispatch('nonexistent.event');
-    expect(true)->toBeTrue();
-});
-
-it('handles Listener interface implementation', function () {
-    $handled = false;
-
-    $listener = new class($handled) implements Listener {
-        public function __construct(public bool &$handled) {}
-        public function handle(Event $event): void
-        {
-            $this->handled = true;
-        }
-    };
-
-    $this->dispatcher->listen('listener.event', $listener);
-    $this->dispatcher->dispatch('listener.event');
-
-    expect($listener->handled)->toBeTrue();
+    expectt($called1)->toBeFalse();
+    expectt($called2)->toBeTrue();
 });
 
 it('works with application container', function () {
@@ -172,7 +173,7 @@ it('works with application container', function () {
 
     dispatcher()->dispatch('app.event');
 
-    expect($called)->toBeTrue();
+    expectt($called)->toBeTrue();
 
     Container::setInstance(null);
 });

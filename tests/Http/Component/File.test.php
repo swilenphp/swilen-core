@@ -7,22 +7,22 @@ use Swilen\Http\Exception\FileNotFoundException;
 uses()->group('Http', 'File');
 
 it('File Content is valid', function () {
-    $file = new UploadedFile(__DIR__.'/../__fixtures__/test.txt', 'test.txt');
+    $file = new UploadedFile(__DIR__ . '/../__fixtures__/test.txt', 'test.txt');
 
-    expect(trim($file->getContent()))->toBe('No content for movement this file');
-    expect($file->getMimeType())->toBe('text/plain');
-    expect($file->getExtension())->toBe('txt');
-    expect($file->getClientOriginalExtension())->toBe('txt');
-    expect($file->getClientOriginalName())->toBe('test.txt');
-    expect($file->getFilename())->toBe('test.txt');
+    expectt(trim($file->getContent()))->toBe('No content for movement this file');
+    expectt($file->getMimeType())->toBe('text/plain');
+    expectt($file->getExtension())->toBe('txt');
+    expectt($file->getClientOriginalExtension())->toBe('txt');
+    expectt($file->getClientOriginalName())->toBe('test.txt');
+    expectt($file->getFilename())->toBe('test.txt');
 });
 
 it('Generate error when file does not exist', function () {
-    new UploadedFile(__DIR__.'/__fixtures__/not-found.txt', 'not-found.txt');
+    new UploadedFile(__DIR__ . '/__fixtures__/not-found.txt', 'not-found.txt');
 })->throws(FileNotFoundException::class);
 
 it('Verify if file is instance of SplFileInfo', function () {
-    $file = new File(__DIR__.'/../__fixtures__/test.txt', true);
+    $file = new File(__DIR__ . '/../__fixtures__/test.txt', true);
 
-    expect($file)->toBeInstanceOf(SplFileInfo::class);
+    expectt($file)->toBeInstanceOf(SplFileInfo::class);
 });

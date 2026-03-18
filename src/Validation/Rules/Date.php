@@ -29,7 +29,8 @@ class Date extends BaseRule
             return false;
         }
 
-        if (!is_null($format = $this->parameter('format')[0] ?? null)) {
+        $format = $this->parameter('format')[0] ?? null;
+        if ($format !== null) {
             $date = \DateTime::createFromFormat($format, $value);
 
             return $this->validated($date, $value, $format);

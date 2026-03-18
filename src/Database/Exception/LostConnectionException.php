@@ -18,9 +18,12 @@ class LostConnectionException extends \RuntimeException
         parent::__construct('', 0, $previous);
 
         $this->code     = (int) $previous instanceof \Throwable ? $previous->getCode() : 2002;
-        $this->message  = $this->formatMessage($previous, $attempts.' reconnection attempts in '.$time.' ms.');
+        $this->message  = $this->formatMessage($previous, $attempts . ' reconnection attempts in ' . $time . ' ms.');
 
         if ($previous instanceof \PDOException) {
+            /**
+             * @var mixed $this
+             */
             $this->errorInfo = $previous->errorInfo;
         }
     }

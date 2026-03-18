@@ -16,14 +16,14 @@ final class RouteAction
     {
         // Return missing action when action is null
         // also missing when it is an empty array
-        if (is_null($action) || empty($action)) {
+        if ($action === null || empty($action)) {
             return static::missingAction($uri);
         }
 
         if (static::isCallable($action, true)) {
             $action = !is_array($action) ? ['uses' => $action] : [
-                'uses' => $action[0].'@'.$action[1],
-                'controller' => $action[0].'@'.$action[1],
+                'uses' => $action[0] . '@' . $action[1],
+                'controller' => $action[0] . '@' . $action[1],
             ];
 
             if (is_string($action['uses']) && strpos($action['uses'], '@') !== false) {
@@ -104,7 +104,7 @@ final class RouteAction
             throw new \UnexpectedValueException("Invalid route action: [{$action}].");
         }
 
-        return $action.'@__invoke';
+        return $action . '@__invoke';
     }
 
     /**

@@ -7,8 +7,8 @@ uses()->group('Validation', 'MessageBag');
 it('Message bag instance created without errors', function () {
     $messages = new MessageBag([]);
 
-    expect($messages->count())->toBe(0);
-    expect($messages)->toBeIterable();
+    expectt($messages->count())->toBe(0);
+    expectt($messages)->toBeIterable();
 });
 
 it('Iterate messages bag as array', function () {
@@ -20,12 +20,12 @@ it('Iterate messages bag as array', function () {
     ]);
 
     foreach ($messages as $key => $message) {
-        expect($key)->toBe('key');
-        expect($message)->toBe(['message', 'second']);
+        expectt($key)->toBe('key');
+        expectt($message)->toBe(['message', 'second']);
     }
 
-    expect($messages)->toBeIterable();
-    expect($messages)->toBeInstanceOf(IteratorAggregate::class);
+    expectt($messages)->toBeIterable();
+    expectt($messages)->toBeInstanceOf(IteratorAggregate::class);
 });
 
 it('Get first message from messages bag or null if not exists', function () {
@@ -36,9 +36,9 @@ it('Get first message from messages bag or null if not exists', function () {
         ],
     ]);
 
-    expect($messages->first('test'))->toBe('First test');
-    expect($messages->get('test'))->toBe(['First test', 'Second test']);
-    expect($messages->first('not-found'))->toBeNull();
+    expectt($messages->first('test'))->toBe('First test');
+    expectt($messages->get('test'))->toBe(['First test', 'Second test']);
+    expectt($messages->first('not-found'))->toBeNull();
 });
 
 it('Get message formatted', function () {
@@ -49,23 +49,23 @@ it('Get message formatted', function () {
         ],
     ]);
 
-    expect($messages->all('$ :message'))->toBe([
+    expectt($messages->all('$ :message'))->toBe([
         'test' => [
             '$ First test',
             '$ Second test',
         ],
     ]);
 
-    expect($messages->firstOfAll('1 :message'))->toBe([
+    expectt($messages->firstOfAll('1 :message'))->toBe([
         'test' => '1 First test',
     ]);
 
-    expect($messages->get('test', '<li> :message </li>'))->toBe([
+    expectt($messages->get('test', '<li> :message </li>'))->toBe([
         '<li> First test </li>',
         '<li> Second test </li>',
     ]);
 
-    expect($messages->first('test', 'TEST :message'))->toBe('TEST First test');
+    expectt($messages->first('test', 'TEST :message'))->toBe('TEST First test');
 });
 
 it('Message bag is empty and is not empty', function () {
@@ -75,8 +75,8 @@ it('Message bag is empty and is not empty', function () {
         ],
     ]);
 
-    expect($messages->isNotEmpty())->toBeTrue();
-    expect($messages->isEmpty())->toBeFalse();
+    expectt($messages->isNotEmpty())->toBeTrue();
+    expectt($messages->isEmpty())->toBeFalse();
 });
 
 it('Current messages keys are exists and is enumerable and deletable', function () {
@@ -89,30 +89,30 @@ it('Current messages keys are exists and is enumerable and deletable', function 
         ],
     ]);
 
-    expect($messages->keys())->toBe(['found', 'other']);
-    expect($messages->has('other'))->toBeTrue();
-    expect($messages->has('not-found'))->toBeFalse();
+    expectt($messages->keys())->toBe(['found', 'other']);
+    expectt($messages->has('other'))->toBeTrue();
+    expectt($messages->has('not-found'))->toBeFalse();
 
     $messages->remove('found', 'other');
 
-    expect($messages->count())->toBe(0);
-    expect($messages->all())->not->toHaveKeys(['found', 'other']);
+    expectt($messages->count())->toBe(0);
+    expectt($messages->all())->not->toHaveKeys(['found', 'other']);
 });
 
 it('Add new messages to message bag', function () {
     $messages = new MessageBag([]);
 
-    expect($messages->count())->toBe(0);
+    expectt($messages->count())->toBe(0);
 
     $messages->add('first_key', 'First Message');
 
-    expect($messages->count())->toBe(1);
-    expect($messages->get('first_key'))->toBe(['First Message']);
+    expectt($messages->count())->toBe(1);
+    expectt($messages->get('first_key'))->toBe(['First Message']);
 
     $messages->add('first_key', 'Second Message');
 
-    expect($messages->get('first_key'))->toHaveCount(2);
-    expect($messages->all())->toHaveCount(1);
+    expectt($messages->get('first_key'))->toHaveCount(2);
+    expectt($messages->all())->toHaveCount(1);
 });
 
 it('Merge new messages to existing message bag', function () {
@@ -122,7 +122,7 @@ it('Merge new messages to existing message bag', function () {
         ],
     ]);
 
-    expect($messages->all())->toHaveCount(1);
+    expectt($messages->all())->toHaveCount(1);
 
     $messages->merge([
         'second' => [
@@ -130,9 +130,9 @@ it('Merge new messages to existing message bag', function () {
         ],
     ]);
 
-    expect($messages->all())->toHaveCount(2);
-    expect($messages->keys())->toBe(['initial', 'second']);
-    expect($messages->getMessages())->toBe([
+    expectt($messages->all())->toHaveCount(2);
+    expectt($messages->keys())->toBe(['initial', 'second']);
+    expectt($messages->getMessages())->toBe([
         'initial' => [
             'message',
         ],
@@ -146,22 +146,22 @@ it('Interact with Message Bag as array with \ArrayAcces implementation', functio
     $messages = new MessageBag([]);
 
     $messages['key'] = 'message';
-    expect($messages['key'])->toBe(['message']);
+    expectt($messages['key'])->toBe(['message']);
 
     $messages['key'] = 'another-message';
-    expect($messages['key'])->toBe(['message', 'another-message']);
+    expectt($messages['key'])->toBe(['message', 'another-message']);
 
-    expect(isset($messages['key']))->toBeTrue();
-    expect(isset($messages['random']))->toBeFalse();
+    expectt(isset($messages['key']))->toBeTrue();
+    expectt(isset($messages['random']))->toBeFalse();
 
     unset($messages['key']);
 
-    expect(isset($messages['key']))->toBeFalse();
-    expect(count($messages))->toBe(0);
+    expectt(isset($messages['key']))->toBeFalse();
+    expectt(count($messages))->toBe(0);
 });
 
 it('Message bag imlement Arrayable', function () {
     $messages = new MessageBag([]);
 
-    expect($messages->toArray())->toBeArray();
+    expectt($messages->toArray())->toBeArray();
 });

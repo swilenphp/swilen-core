@@ -26,6 +26,6 @@ class Required extends BaseRule
             return count($value) > 0;
         }
 
-        return !is_null($value);
+        return $value !== null;
     }
 }

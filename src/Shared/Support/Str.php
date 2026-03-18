@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Swilen\Shared\Support;
 
-class Str
+final class Str
 {
     /**
      * Determine given neddles itset in given haystack.
@@ -12,11 +14,14 @@ class Str
      *
      * @return bool
      */
-    public static function contains(string $haystack, $needles): bool
+    public static function contains(string $haystack, string|array $needles): bool
     {
-        return static::compare($haystack, $needles, function ($haystack, $needle) {
-            return $needle !== '' && mb_strpos($haystack, $needle) !== false;
-        });
+        return static::compare(
+            $haystack,
+            $needles,
+            fn($h, $n) =>
+            $n !== '' && str_contains($h, $n)
+        );
     }
 
     /**
@@ -27,11 +32,14 @@ class Str
      *
      * @return bool
      */
-    public static function startsWith(string $haystack, $needles): bool
+    public static function startsWith(string $haystack, string|array $needles): bool
     {
-        return static::compare($haystack, $needles, function ($haystack, $needle) {
-            return strncmp($haystack, $needle, \strlen($needle)) === 0;
-        });
+        return static::compare(
+            $haystack,
+            $needles,
+            fn($h, $n) =>
+            str_starts_with($h, $n)
+        );
     }
 
     /**
@@ -42,17 +50,14 @@ class Str
      *
      * @return bool
      */
-    public static function endsWith(string $haystack, $needles): bool
+    public static function endsWith(string $haystack, string|array $needles): bool
     {
-        return static::compare($haystack, $needles, function ($haystack, $needle) {
-            if ($haystack === '' && $needle !== '') {
-                return false;
-            }
-
-            $len = strlen($needle);
-
-            return substr_compare($haystack, $needle, -$len, $len) === 0;
-        });
+        return static::compare(
+            $haystack,
+            $needles,
+            fn($h, $n) =>
+            str_ends_with($h, $n)
+        );
     }
 
     /**
@@ -64,7 +69,7 @@ class Str
      *
      * @return bool
      */
-    protected static function compare(string $haystack, $needles, \Closure $callback): bool
+    protected static function compare(string $haystack, string|array $needles, \Closure $callback): bool
     {
         foreach ((array) $needles as $needle) {
             if ($callback($haystack, $needle)) {
@@ -82,9 +87,9 @@ class Str
      *
      * @return string
      */
-    public static function upper(string $value)
+    public static function upper(string $value): string
     {
-        return mb_strtoupper($value, 'UTF-8');
+        return mb_strtoupper($value);
     }
 
     /**
@@ -94,9 +99,9 @@ class Str
      *
      * @return string
      */
-    public static function lower(string $value)
+    public static function lower(string $value): string
     {
-        return mb_strtolower($value, 'UTF-8');
+        return mb_strtolower($value);
     }
 
     /**
@@ -107,11 +112,9 @@ class Str
      *
      * @return string
      */
-    public static function match(string $pattern, string $subject)
+    public static function match(string $pattern, string $subject): string
     {
-        preg_match($pattern, $subject, $matches);
-
-        if (!$matches) {
+        if (!preg_match($pattern, $subject, $matches)) {
             return '';
         }
 
@@ -125,7 +128,7 @@ class Str
      *
      * @return int
      */
-    public static function length(string $value)
+    public static function length(string $value): int
     {
         return mb_strlen($value);
     }
@@ -139,24 +142,47 @@ class Str
      *
      * @return string
      */
-    public static function slug($title, string $divider = '-', string $default = 'n-a')
+    public static function slug(string $title, string $divider = '-', string $default = 'n-a'): string
     {
+        // // transliterate
+        // $title = iconv('UTF-8', 'ASCII//TRANSLIT', $title) ?: $title;
+
+        // // Convert all dashes/underscores into separator
+        // $flip = $divider === '-' ? '_' : '-';
+
+        // $title = preg_replace('![' . preg_quote($flip) . ']+!u', $divider, $title);
+
+        // // Replace @ with the word 'at'
+        // $title = str_replace('@', $divider . 'at' . $divider, $title);
+
+        // // Remove all characters that are not the divider, letters, numbers, or whitespace.
+        // $title = preg_replace(
+        //     '![' . preg_quote($divider) . '\pL\pN\s]+!u',
+        //     '',
+        //     mb_strtolower($title)
+        // );
+
+        // // Replace all divider characters and whitespace by a single divider
+        // $title = preg_replace('![' . preg_quote($divider) . '\s]+!u', $divider, $title);
+
+        // return trim($title, $divider) ?: $default;
+
+
         // transliterate
         $title = iconv('utf-8', 'us-ascii//TRANSLIT', $title);
 
         // Convert all dashes/underscores into separator
         $flip = $divider === '-' ? '_' : '-';
-
-        $title = preg_replace('!['.preg_quote($flip).']+!u', $divider, $title);
+        $title = preg_replace('![' . preg_quote($flip) . ']+!u', $divider, $title);
 
         // Replace @ with the word 'at'
-        $title = str_replace('@', $divider.'at'.$divider, $title);
+        $title = str_replace('@', $divider . 'at' . $divider, $title);
 
         // Remove all characters that are not the divider$divider, letters, numbers, or whitespace.
-        $title = preg_replace('![^'.preg_quote($divider).'\pL\pN\s]+!u', '', static::lower($title));
+        $title = preg_replace('![^' . preg_quote($divider) . '\pL\pN\s]+!u', '', static::lower($title));
 
         // Replace all divider$divider characters and whitespace by a single divider$divider
-        $title = preg_replace('!['.preg_quote($divider).'\s]+!u', $divider, $title);
+        $title = preg_replace('![' . preg_quote($divider) . '\s]+!u', $divider, $title);
 
         return trim($title, $divider) ?: $default;
     }
@@ -166,19 +192,16 @@ class Str
      *
      * @return string
      */
-    public static function uuid()
+    public static function uuid(): string
     {
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0x0FFF) | 0x4000,
-            mt_rand(0, 0x3FFF) | 0x8000,
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF)
-        );
+        $data = random_bytes(16);
+
+        // version 4
+        $data[6] = chr((ord($data[6]) & 0x0f) | 0x40);
+        // variant RFC 4122
+        $data[8] = chr((ord($data[8]) & 0x3f) | 0x80);
+
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
     /**
@@ -189,15 +212,16 @@ class Str
      *
      * @return bool
      */
-    public static function isUuid($uuid, bool $v4 = true)
+    public static function isUuid(mixed $uuid, bool $v4 = true): bool
     {
         if (!is_string($uuid)) {
             return false;
         }
 
         return (bool) preg_match(
-            $v4 ? '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/'
-                : '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/',
+            $v4
+                ? '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i'
+                : '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
             $uuid
         );
     }
@@ -209,8 +233,20 @@ class Str
      *
      * @return string
      */
-    public static function trimPath($path = '')
+    public static function trimPath(mixed $path = ''): string
     {
-        return !is_string($path) ? '' : '/'.trim($path ?: '/', '\/');
+        return !is_string($path) ? '' : '/' . trim($path ?: '/', '\/');
+    }
+
+    /**
+     * Get a new Stringable instance.
+     *
+     * @param string $value
+     *
+     * @return \Swilen\Shared\Support\Stringable
+     */
+    public static function of(string $value): Stringable
+    {
+        return new Stringable($value);
     }
 }

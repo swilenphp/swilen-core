@@ -10,8 +10,8 @@ it('Validator init with __constructor or make method', function () {
     $validator     = new Validator([]);
     $makeValidator = Validator::make([]);
 
-    expect($validator)->toBeInstanceOf(Validator::class);
-    expect($makeValidator)->toBeInstanceOf(Validator::class);
+    expectt($validator)->toBeInstanceOf(Validator::class);
+    expectt($makeValidator)->toBeInstanceOf(Validator::class);
 });
 
 it('Validator implements Arrayable', function () {
@@ -21,8 +21,8 @@ it('Validator implements Arrayable', function () {
         'age' => 18,
     ]);
 
-    expect($validator->toArray())->toBeArray();
-    expect($validator->toArray())->toHaveKeys(['inputs', 'errors', 'rules']);
+    expectt($validator->toArray())->toBeArray();
+    expectt($validator->toArray())->toHaveKeys(['inputs', 'errors', 'rules']);
 });
 
 it('Validate simple inputs', function () {
@@ -38,18 +38,20 @@ it('Validate simple inputs', function () {
         'age' => 'required|int',
     ]);
 
-    expect($validator->fails())->toBeFalse();
+    expectt($validator->fails())->toBeFalse();
 });
 
 it('Validate simple inputs is same time', function () {
-    $validator = Validator::make([
-        'email' => 'example@domain.com',
-    ],
+    $validator = Validator::make(
+        [
+            'email' => 'example@domain.com',
+        ],
         [
             'email' => 'email|required',
-        ]);
+        ]
+    );
 
-    expect($validator->fails())->toBeFalse();
+    expectt($validator->fails())->toBeFalse();
 });
 
 it('Parse rules from array or string', function () {
@@ -58,7 +60,7 @@ it('Parse rules from array or string', function () {
         'other' => 'alpha|nullable',
     ]);
 
-    expect($validator->fails())->toBeFalse();
+    expectt($validator->fails())->toBeFalse();
 });
 
 it('Parse rule arguments', function () {
@@ -69,7 +71,7 @@ it('Parse rule arguments', function () {
         'country' => 'in:Peru,Colombia,Ecuador|required',
     ]);
 
-    expect($validator->fails())->toBeFalse();
+    expectt($validator->fails())->toBeFalse();
 });
 
 it('Skip rule if is regex', function () {
@@ -77,7 +79,7 @@ it('Skip rule if is regex', function () {
         'country' => ['regex:/(Peru|Colombia|Bolivia)/', 'required'],
     ]);
 
-    expect($validator->fails())->toBeFalse();
+    expectt($validator->fails())->toBeFalse();
 });
 
 it('Add message when validate is fails', function () {
@@ -93,10 +95,10 @@ it('Add message when validate is fails', function () {
         'age' => 'required|int',
     ]);
 
-    expect($validator->fails())->toBeTrue();
-    expect($validator->errors()->all())->toHaveCount(2);
-    expect($validator->errors('email'))->toBeArray();
-    expect($validator->errors('age'))->toBeNull();
+    expectt($validator->fails())->toBeTrue();
+    expectt($validator->errors()->all())->toHaveCount(2);
+    expectt($validator->errors('email'))->toBeArray();
+    expectt($validator->errors('age'))->toBeNull();
 });
 
 it('Skip validator if value not exits and rule is not includes REQUIRED', function () {
@@ -109,8 +111,8 @@ it('Skip validator if value not exits and rule is not includes REQUIRED', functi
         'age' => 'int|in:29,18'
     ]);
 
-    expect($validator->errors('age'))->toBeNull();
-    expect($validator->fails())->toBeFalse();
+    expectt($validator->errors('age'))->toBeNull();
+    expectt($validator->fails())->toBeFalse();
 });
 
 it('Acces to inputs has object property', function () {
@@ -120,8 +122,8 @@ it('Acces to inputs has object property', function () {
         'age' => 18,
     ]);
 
-    expect($validator->email)->toBe('example.com');
-    expect($validator->age)->toBe(18);
+    expectt($validator->email)->toBe('example.com');
+    expectt($validator->age)->toBe(18);
 });
 
 it('Throw error when rule is not registered', function () {

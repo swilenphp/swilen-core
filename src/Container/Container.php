@@ -160,7 +160,7 @@ class Container implements \ArrayAccess, ContainerContract
     {
         $this->dropStaleInstances($abstract);
 
-        if (is_null($concrete)) {
+        if ($concrete === null) {
             $concrete = $abstract;
         }
 
@@ -479,6 +479,20 @@ class Container implements \ArrayAccess, ContainerContract
     }
 
     /**
+     * Call a method on a given object with automatic dependency injection.
+     *
+     * @param object|string $object
+     * @param string        $method
+     * @param array         $parameters
+     *
+     * @return mixed
+     */
+    public function callMethod(object|string $object, string $method, array $parameters = [])
+    {
+        return Method::call($this, [$object, $method], $parameters);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function get(string $id)
@@ -519,7 +533,7 @@ class Container implements \ArrayAccess, ContainerContract
     {
         $concrete = $this->getContextualConcrete($abstract = $this->getAlias($abstract));
 
-        $needsContextualBuild = !empty($parameters) || !is_null($concrete);
+        $needsContextualBuild = !empty($parameters) || $concrete !== null;
 
         if (isset($this->instances[$abstract]) && !$needsContextualBuild) {
             return $this->instances[$abstract];
@@ -527,7 +541,7 @@ class Container implements \ArrayAccess, ContainerContract
 
         $this->with[] = $parameters;
 
-        if (is_null($concrete)) {
+        if ($concrete === null) {
             $concrete = $this->getConcrete($abstract);
         }
 
@@ -578,7 +592,8 @@ class Container implements \ArrayAccess, ContainerContract
      */
     protected function getContextualConcrete($abstract)
     {
-        if (!is_null($binding = $this->findInContextualBindings($abstract))) {
+        $binding = $this->findInContextualBindings($abstract);
+        if ($binding !== null) {
             return $binding;
         }
 
@@ -587,7 +602,8 @@ class Container implements \ArrayAccess, ContainerContract
         }
 
         foreach ($this->abstractAliases[$abstract] as $alias) {
-            if (!is_null($binding = $this->findInContextualBindings($alias))) {
+            $binding = $this->findInContextualBindings($alias);
+            if ($binding !== null) {
                 return $binding;
             }
         }
@@ -648,7 +664,8 @@ class Container implements \ArrayAccess, ContainerContract
         $this->buildStack[] = $concrete;
 
         // Create new instance when constructor not contains dependencies.
-        if (is_null($constructor = $reflector->getConstructor())) {
+        $constructor = $reflector->getConstructor();
+        if ($constructor === null) {
             array_pop($this->buildStack);
 
             return $reflector->newInstance();
@@ -686,7 +703,7 @@ class Container implements \ArrayAccess, ContainerContract
                 continue;
             }
 
-            $result = is_null(Helper::getParameterClassName($dependency))
+            $result = Helper::getParameterClassName($dependency) === null
                 ? $this->resolvePrimitive($dependency)
                 : $this->resolveClass($dependency);
 
@@ -746,7 +763,8 @@ class Container implements \ArrayAccess, ContainerContract
      */
     protected function resolvePrimitive(\ReflectionParameter $parameter)
     {
-        if (!is_null($concrete = $this->getContextualConcrete('$' . $parameter->getName()))) {
+        $concrete = $this->getContextualConcrete('$' . $parameter->getName());
+        if ($concrete !== null) {
             return $concrete instanceof \Closure ? $concrete($this) : $concrete;
         }
 
@@ -931,7 +949,7 @@ class Container implements \ArrayAccess, ContainerContract
      *
      * @return \Swilen\Shared\Container\Container
      */
-    public static function setInstance(ContainerContract $instance = null)
+    public static function setInstance(?ContainerContract $instance = null)
     {
         return static::$instance = $instance;
     }
@@ -943,7 +961,7 @@ class Container implements \ArrayAccess, ContainerContract
      */
     public static function getInstance()
     {
-        if (is_null(static::$instance)) {
+        if (static::$instance === null) {
             return static::$instance = new static();
         }
 

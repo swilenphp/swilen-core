@@ -18,47 +18,47 @@ it('Call method', function () {
         return 10;
     });
 
-    expect($result)->toBeInt();
+    expectt($result)->toBeInt();
 });
 
 it('Call invoke class', function () {
     $result = Method::call($this->container, InvokableStub::class);
 
-    expect($result)->toBeInt();
+    expectt($result)->toBeInt();
 });
 
 it('Call invoke class in array', function () {
-    $result = Method::call($this->container, InvokableStub::class.'@__invoke');
+    $result = Method::call($this->container, InvokableStub::class . '@__invoke');
 
-    expect($result)->toBeInt();
+    expectt($result)->toBeInt();
 });
 
 it('Call class method as normal', function () {
-    $result = Method::call($this->container, InvokableStub::class.'@method');
-    expect($result)->toBeString();
+    $result = Method::call($this->container, InvokableStub::class . '@method');
+    expectt($result)->toBeString();
 
     $result = Method::call($this->container, [new InvokableStub(), 'method']);
-    expect($result)->toBeString();
+    expectt($result)->toBeString();
 });
 
 it('Call method binding into container', function () {
-    $this->container->bindMethod(InvokableStub::class.'@method', function ($app) {
+    $this->container->bindMethod(InvokableStub::class . '@method', function ($app) {
         return 'echo';
     });
 
-    $result = Method::call($this->container, InvokableStub::class.'@method');
+    $result = Method::call($this->container, InvokableStub::class . '@method');
 
-    expect($result)->toBe('echo');
+    expectt($result)->toBe('echo');
 });
 
 it('Call class method as static', function () {
-    $result = Method::call($this->container, InvokableStub::class.'::staticMethod');
+    $result = Method::call($this->container, InvokableStub::class . '::staticMethod');
 
-    expect($result)->toBeArray();
+    expectt($result)->toBeArray();
 });
 
 it('Throw error when call class without method and not contains __invoke method', function () {
-    Method::call($this->container, NormalyClassStub::class.'@');
+    Method::call($this->container, NormalyClassStub::class . '@');
 })->throws(InvalidArgumentException::class, 'Method not provided.');
 
 it('Call Closure with dependency injection in parameter', function () {
@@ -70,7 +70,7 @@ it('Call Closure with dependency injection in parameter', function () {
         return $repository->find();
     };
 
-    expect($this->container->call($closure))->toBeInt();
+    expectt($this->container->call($closure))->toBeInt();
 });
 
 it('Call __invoke function was class is used as function', function () {
@@ -87,38 +87,38 @@ it('Call __invoke function was class is used as function', function () {
 
     $result = $this->container->call($class);
 
-    expect($result)->toBeInt();
+    expectt($result)->toBeInt();
 });
 
 it('call Closure with parameters', function () {
     $result = Method::call($this->container, function ($var) {
         return $var;
     }, ['var' => 'foo']);
-    expect($result)->toBe('foo');
+    expectt($result)->toBe('foo');
 
     $result = Method::call($this->container, function ($val = 'bar') {
         return $val;
     });
-    expect($result)->toBe('bar');
+    expectt($result)->toBe('bar');
 
     $instance       = new stdClass();
     $instance->data = true;
 
-    $result = Method::call($this->container, NormalyClassStub::class.'@withParams', [
+    $result = Method::call($this->container, NormalyClassStub::class . '@withParams', [
         stdClass::class => $instance,
     ]);
-    expect($result)->toBeInstanceOf(stdClass::class);
-    expect($result->data)->toBeTrue();
+    expectt($result)->toBeInstanceOf(stdClass::class);
+    expectt($result->data)->toBeTrue();
 });
 
 it('call Closure with variadic parameters', function () {
     $result = Method::call($this->container, function (...$var) {
         return $var;
     }, ['foo', 'bar']);
-    expect($result)->toBe(['foo', 'bar']);
+    expectt($result)->toBe(['foo', 'bar']);
 
-    $result = Method::call($this->container, NormalyVariadicClassStub::class.'@method');
-    expect($result)->toBe(100);
+    $result = Method::call($this->container, NormalyVariadicClassStub::class . '@method');
+    expectt($result)->toBe(100);
 });
 
 it('Throw error when call Closure missing parameters', function () {

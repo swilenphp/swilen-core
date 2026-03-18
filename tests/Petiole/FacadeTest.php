@@ -28,7 +28,7 @@ it('Facade implemetacion', function () {
         };
     });
 
-    expect(TestFacade::retrieve(20))->toBe(20);
+    expectt(TestFacade::retrieve(20))->toBe(20);
 });
 /**
  * @method static int retrieve(int $number)

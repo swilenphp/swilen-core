@@ -8,9 +8,9 @@ uses()->group('Http', 'Response');
 
 it('Espect \Response instance created succesfully and is instance of \Swilen\Http\Response\JsonResponse', function () {
     $response = new JsonResponse();
-    expect($response)->toBeObject();
-    expect($response)->toBeInstanceOf(JsonResponse::class);
-    expect($response->getStatusCode())->toBe(Http::OK);
+    expectt($response)->toBeObject();
+    expectt($response)->toBeInstanceOf(JsonResponse::class);
+    expectt($response->getStatusCode())->toBe(Http::OK);
 });
 
 it('Expect JsonResponse() send content as json', function () {
@@ -18,33 +18,33 @@ it('Expect JsonResponse() send content as json', function () {
     list($response, $content) = getBuffer(function () {
         return (new JsonResponse(['hello' => 'World']))->prepare(Request::make(''))->terminate();
     });
-    expect($response->headers->get('Content-Type'))->toMatch('/^application\/json+/');
-    expect($response->getStatusCode())->toBe(Http::OK);
-    expect($response->getBody())->toBeJson();
-    expect($content)->toBe('{"hello":"World"}');
+    expectt($response->headers->get('Content-Type'))->toMatch('/^application\/json+/');
+    expectt($response->getStatusCode())->toBe(Http::OK);
+    expectt($response->getBody())->toBeJson();
+    expectt($content)->toBe('{"hello":"World"}');
 });
 
 it('Prevent override Content-Type in header', function () {
     $response = new JsonResponse([], 200, ['Content-Type' => 'text/html']);
 
-    expect($response->headers->get('Content-Type'))->toMatch('/^application\/json+/');
+    expectt($response->headers->get('Content-Type'))->toMatch('/^application\/json+/');
 });
 
 it('Send new JsonResponse from jsonString', function () {
     $response = JsonResponse::fromJson('{"bar":"foo"}');
 
-    expect($response->getBody())->toBe('{"bar":"foo"}');
-    expect($response->isOk())->toBeTrue();
+    expectt($response->getBody())->toBe('{"bar":"foo"}');
+    expectt($response->isOk())->toBeTrue();
 });
 
 it('Interact with json body', function () {
     $response = new JsonResponse();
 
-	expect($response->getBody())->toBeJson();
-	expect($response->getBody())->toBe('{}');
+    expectt($response->getBody())->toBeJson();
+    expectt($response->getBody())->toBe('{}');
 
-	$response->withBody([]);
-	expect($response->getBody())->toBe('[]');
+    $response->withBody([]);
+    expectt($response->getBody())->toBe('[]');
 });
 
 

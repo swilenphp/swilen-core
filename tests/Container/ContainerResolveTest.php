@@ -15,9 +15,9 @@ afterEach(function () {
 
 it('Resolve given class target with empty constructor', function () {
     $object = $this->container->make(EmptyConstructorStub::class);
-    expect($object)->toBeObject();
-    expect($object->get())->toBeInt();
-    expect($this->container->bindings())->toBeEmpty();
+    expectt($object)->toBeObject();
+    expectt($object->get())->toBeInt();
+    expectt($this->container->bindings())->toBeEmpty();
 });
 
 it('Throw exception if service not found', function () {
@@ -26,25 +26,25 @@ it('Throw exception if service not found', function () {
 
 it('Resolve given class target with constructor default value', function () {
     $object = $this->container->make(WithConstructorStub::class);
-    expect($object)->toBeObject();
-    expect($object->age())->toBe(20);
+    expectt($object)->toBeObject();
+    expectt($object->age())->toBe(20);
 });
 
 it('Resolve given class target with constructor parameters', function () {
     $object = $this->container->make(WithConstructorStub::class, ['age' => 25]);
-    expect($object)->toBeObject();
-    expect($object->age())->toBe(25);
+    expectt($object)->toBeObject();
+    expectt($object->age())->toBe(25);
 });
 
 it('Resolve resolve given class target with constructor required parameters', function () {
     $object = $this->container->make(WithConstructorRequiredStub::class, ['age' => 20]);
-    expect($object)->toBeObject();
-    expect($object->age())->toBe(20);
+    expectt($object)->toBeObject();
+    expectt($object->age())->toBe(20);
 });
 
 it('Resolve variadic class', function () {
     $instance = $this->container->make(VariadicClassStub::class, ['args' => 50]);
-    expect($instance->args)->toBeArray();
+    expectt($instance->args)->toBeArray();
 });
 
 it('Throw error in resolve given class target with constructor required parameters', function () {
@@ -108,6 +108,4 @@ class VariadicClassStub
     }
 }
 
-interface NotInstantiableStub
-{
-}
+interface NotInstantiableStub {}

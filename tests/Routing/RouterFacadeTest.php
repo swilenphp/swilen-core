@@ -28,8 +28,8 @@ it('Router Facade registered succesfully', function () {
         return ['hola' => 'Mundo'];
     })->name('test-hola')->use(Authenticate::class);
 
-    expect($route)->toBeInstanceOf(RoutingRoute::class);
-    expect($route->getName())->toBe('test-hola');
-    expect($route->middlewares())->toBe([Authenticate::class]);
-    expect($route->getMethod())->toBe('GET');
+    expectt($route)->toBeInstanceOf(RoutingRoute::class);
+    expectt($route->getName())->toBe('test-hola');
+    expectt($route->middlewares())->toBe([Authenticate::class]);
+    expectt($route->getMethod())->toBe('GET');
 });

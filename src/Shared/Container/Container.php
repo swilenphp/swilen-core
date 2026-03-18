@@ -55,4 +55,25 @@ interface Container extends ContainerInterface
      * @return mixed
      */
     public function instance(string $abstract, $instance);
+
+    /**
+     * Call a callable with automatic dependency injection.
+     *
+     * @param callable $callable
+     * @param array    $parameters
+     *
+     * @return mixed
+     */
+    public function call(callable $callable, array $parameters = []);
+
+    /**
+     * Call a method on a given object with automatic dependency injection.
+     *
+     * @param object|string $object
+     * @param string        $method
+     * @param array         $parameters
+     *
+     * @return mixed
+     */
+    public function callMethod(object|string $object, string $method, array $parameters = []);
 }

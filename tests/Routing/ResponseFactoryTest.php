@@ -12,16 +12,16 @@ uses()->group('Routing');
 it('Response Factory return correspond instance for the method', function () {
     $factory = new ResponseFactory();
 
-    expect($factory->send(''))->toBeInstanceOf(Response::class);
-    expect($factory->status(Http::OK))->toBeInstanceOf(Response::class);
-    expect($factory->json(''))->toBeInstanceOf(JsonResponse::class);
-    expect($factory->file(getReadableFileStub()))->toBeInstanceOf(BinaryFileResponse::class);
-    expect($factory->download(getReadableFileStub()))->toBeInstanceOf(BinaryFileResponse::class);
-    expect($factory->stream(function () {}))->toBeInstanceOf(StreamedResponse::class);
+    expectt($factory->send(''))->toBeInstanceOf(Response::class);
+    expectt($factory->status(Http::OK))->toBeInstanceOf(Response::class);
+    expectt($factory->json(''))->toBeInstanceOf(JsonResponse::class);
+    expectt($factory->file(getReadableFileStub()))->toBeInstanceOf(BinaryFileResponse::class);
+    expectt($factory->download(getReadableFileStub()))->toBeInstanceOf(BinaryFileResponse::class);
+    expectt($factory->stream(function () {}))->toBeInstanceOf(StreamedResponse::class);
 
     $binary = new ResponseFactory();
     $filename = 'testing.txt';
     $binary = $binary->download(getReadableFileStub(), $filename);
 
-    expect($binary->headers->get('Content-Disposition'))->toBe('attachment; filename="'.$filename.'"');
+    expectt($binary->headers->get('Content-Disposition'))->toBe('attachment; filename="' . $filename . '"');
 });

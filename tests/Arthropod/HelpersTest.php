@@ -16,12 +16,12 @@ uses()->group('Application', 'Helpers');
 
 it('Application core helper app()', function () {
     $app = new Application();
-    expect(app())->toBeInstanceOf(ArthropodApplication::class);
-    expect(app())->toBeInstanceOf(Application::class);
-    expect(app())->toBeInstanceOf(Container::class);
-    expect(app('app'))->toBeInstanceOf(Application::class);
+    expectt(app())->toBeInstanceOf(ArthropodApplication::class);
+    expectt(app())->toBeInstanceOf(Application::class);
+    expectt(app())->toBeInstanceOf(Container::class);
+    expectt(app('app'))->toBeInstanceOf(Application::class);
 
-    expect(app(MakeClassAppHelperStub::class))->toBeInstanceOf(MakeClassAppHelperStub::class);
+    expectt(app(MakeClassAppHelperStub::class))->toBeInstanceOf(MakeClassAppHelperStub::class);
 
     $app->setInstance(null);
 });
@@ -29,17 +29,17 @@ it('Application core helper app()', function () {
 it('Response helper is instaceof Routing\ResponsiFactory', function () {
     $app = new Application();
 
-    expect(response())->toBeInstanceOf(ResponseFactory::class);
+    expectt(response())->toBeInstanceOf(ResponseFactory::class);
 
-    expect(response()->send())->toBeInstanceOf(Response::class);
-    expect(response()->file(new File(getReadableFileStub())))->toBeInstanceOf(BinaryFileResponse::class);
-    expect(response()->download(new File(getReadableFileStub())))->toBeInstanceOf(BinaryFileResponse::class);
-    expect(response()->json())->toBeInstanceOf(JsonResponse::class);
-    expect(response()->stream(function () {}))->toBeInstanceOf(StreamedResponse::class);
+    expectt(response()->send())->toBeInstanceOf(Response::class);
+    expectt(response()->file(new File(getReadableFileStub())))->toBeInstanceOf(BinaryFileResponse::class);
+    expectt(response()->download(new File(getReadableFileStub())))->toBeInstanceOf(BinaryFileResponse::class);
+    expectt(response()->json())->toBeInstanceOf(JsonResponse::class);
+    expectt(response()->stream(function () {}))->toBeInstanceOf(StreamedResponse::class);
 
     $app[ResponseFactory::class] = new stdClass();
 
-    expect(response())->toBeInstanceOf(stdClass::class);
+    expectt(response())->toBeInstanceOf(stdClass::class);
 
     $app->setInstance(null);
 });
@@ -49,8 +49,8 @@ it('Request helper is instaceof Http\Request', function () {
 
     $app->instance('request', Request::capture());
 
-    expect(request())->toBeInstanceOf(Request::class);
-    expect(request()->getMethod())->toBe('GET');
+    expectt(request())->toBeInstanceOf(Request::class);
+    expectt(request()->getMethod())->toBe('GET');
 });
 
 it('Work with application paths', function () {
@@ -58,13 +58,13 @@ it('Work with application paths', function () {
 
     $app->useBasePath(__DIR__);
 
-    expect(base_path())->toBe(__DIR__);
+    expectt(base_path())->toBe(__DIR__);
 
     $app->useAppPath('test');
 
-    expect(app_path())->toBe(__DIR__ . DIRECTORY_SEPARATOR . 'test');
-    expect(storage_path())->toBe(__DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'storage');
-    expect(storage_path('test'))->toBe(__DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'test');
+    expectt(app_path())->toBe(__DIR__ . DIRECTORY_SEPARATOR . 'test');
+    expectt(storage_path())->toBe(__DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'storage');
+    expectt(storage_path('test'))->toBe(__DIR__ . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'test');
 
     $app->setInstance(null);
 });
@@ -74,16 +74,16 @@ it('Work with application config', function () {
 
     $app->instance('config', new Repository(['item' => 'test']));
 
-    expect(config())->toBeInstanceOf(Repository::class);
-    expect(config('item'))->toBe('test');
-    expect(config('not-found', 'bar'))->toBe('bar');
+    expectt(config())->toBeInstanceOf(Repository::class);
+    expectt(config('item'))->toBe('test');
+    expectt(config('not-found', 'bar'))->toBe('bar');
 
     $app->setInstance(null);
 });
 
 it('env helper get environment variables', function () {
-    expect(env('NULL'))->toBeNull();
-    expect(env('REQUEST_METHOD', false))->toBeFalse();
+    expectt(env('NULL'))->toBeNull();
+    expectt(env('REQUEST_METHOD', false))->toBeFalse();
 });
 
 it('Work with tap helper', function () {
@@ -96,8 +96,8 @@ it('Work with tap helper', function () {
         $value = $object->makeit;
     });
 
-    expect($value)->toBe('test');
-    expect($result)->toBeInstanceOf(stdClass::class);
+    expectt($value)->toBe('test');
+    expectt($result)->toBeInstanceOf(stdClass::class);
 });
 
 it('Cannot redeclare helper functions', function () {
@@ -108,7 +108,7 @@ it('Cannot redeclare helper functions', function () {
         }
     }
 
-    expect(app())->not->toBeTrue();
+    expectt(app())->not->toBeTrue();
 
     if (!function_exists('tap')) {
         function tap()
@@ -117,7 +117,7 @@ it('Cannot redeclare helper functions', function () {
         }
     }
 
-    expect(tap('Hola', function () {}))->not->toBeTrue();
+    expectt(tap('Hola', function () {}))->not->toBeTrue();
 });
 
 class MakeClassAppHelperStub {}

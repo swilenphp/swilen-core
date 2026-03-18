@@ -9,25 +9,19 @@ it('Get parameters from Reflection class', function () {
 
     $parameters = $class->getConstructor()->getParameters();
 
-    expect(Helper::getParameterClassName($parameters[0]))->toBe('Closure');
-    expect(Helper::getParameterClassName($parameters[1]))->toBeNull();
+    expectt(Helper::getParameterClassName($parameters[0]))->toBe('Closure');
+    expectt(Helper::getParameterClassName($parameters[1]))->toBeNull();
 
     $declaringParameters = new ReflectionParameter([ExtendingParameterNamedStub::class, 'method'], 0);
 
-    expect(Helper::getParameterClassName($declaringParameters))->toBe(ReflectionObject::class);
+    expectt(Helper::getParameterClassName($declaringParameters))->toBe(ReflectionObject::class);
 });
 
 class GetParameterClassNameStub
 {
-    public function __construct(Closure $callback, int $age)
-    {
-    }
+    public function __construct(Closure $callback, int $age) {}
 
-    public function method(ReflectionObject $callback)
-    {
-    }
+    public function method(ReflectionObject $callback) {}
 }
 
-class ExtendingParameterNamedStub extends GetParameterClassNameStub
-{
-}
+class ExtendingParameterNamedStub extends GetParameterClassNameStub {}

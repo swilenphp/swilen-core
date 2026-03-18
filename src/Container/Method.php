@@ -56,7 +56,7 @@ final class Method
         $method = count($segments) === 2
             ? $segments[1] : $defaultMethod;
 
-        if (is_null($method) || empty($method)) {
+        if ($method === null || $method === '') {
             throw new \InvalidArgumentException('Method not provided.');
         }
 
@@ -102,7 +102,7 @@ final class Method
     {
         $class = is_string($callback[0]) ? $callback[0] : get_class($callback[0]);
 
-        return $class.'@'.$callback[1];
+        return $class . '@' . $callback[1];
     }
 
     /**
@@ -169,7 +169,7 @@ final class Method
             $dependencies[] = $parameters[$paramName];
 
             unset($parameters[$paramName]);
-        } elseif (!is_null($className = Helper::getParameterClassName($parameter))) {
+        } elseif ($className = Helper::getParameterClassName($parameter)) {
             if (array_key_exists($className, $parameters)) {
                 $dependencies[] = $parameters[$className];
 
@@ -188,7 +188,7 @@ final class Method
         } elseif ($parameter->isDefaultValueAvailable()) {
             $dependencies[] = $parameter->getDefaultValue();
         } elseif (!$parameter->isOptional() && !array_key_exists($paramName, $parameters)) {
-            $message = 'Unable to resolve dependency ['.$parameter.'] in class '.$parameter->getDeclaringClass()->getName();
+            $message = 'Unable to resolve dependency [' . $parameter . '] in class ' . $parameter->getDeclaringClass()->getName();
 
             throw new \RuntimeException($message);
         }

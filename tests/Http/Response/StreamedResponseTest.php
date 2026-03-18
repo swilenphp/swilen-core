@@ -8,10 +8,10 @@ uses()->group('Http', 'Response');
 
 it('Espect \Response instance created succesfully and is instance of \Swilen\Http\Response\StreamedResponse', function () {
     $response = new StreamedResponse(function () {});
-    expect($response)->toBeObject();
-    expect($response)->toBeInstanceOf(StreamedResponse::class);
-    expect($response->getStatusCode())->toBe(Http::OK);
-    expect($response->getBody())->toBeNull();
+    expectt($response)->toBeObject();
+    expectt($response)->toBeInstanceOf(StreamedResponse::class);
+    expectt($response->getStatusCode())->toBe(Http::OK);
+    expectt($response->getBody())->toBeNull();
 });
 
 it('Expect StreamedResponse() send content as json', function () {
@@ -23,10 +23,10 @@ it('Expect StreamedResponse() send content as json', function () {
             'Content-Type' => 'application/json',
         ]))->prepare(Request::make(''))->terminate();
     });
-    expect($response->headers->get('Content-Type'))->toBeGreaterThanOrEqual('application/json');
-    expect($response->isOk())->toBeTrue();
-    expect($response->getBody())->toBeNull();
-    expect($content)->toBe('{"hello":"World"}');
+    expectt($response->headers->get('Content-Type'))->toBeGreaterThanOrEqual('application/json');
+    expectt($response->isOk())->toBeTrue();
+    expectt($response->getBody())->toBeNull();
+    expectt($content)->toBe('{"hello":"World"}');
 });
 
 it('Expect StreamedResponse() send content with sleep', function () {
@@ -40,9 +40,9 @@ it('Expect StreamedResponse() send content with sleep', function () {
             flush();
         }))->prepare(Request::make(''))->terminate();
     });
-    expect($response->isOk())->toBeTrue();
-    expect($response->getBody())->toBeNull();
-    expect($content)->toBe('First,Second');
+    expectt($response->isOk())->toBeTrue();
+    expectt($response->getBody())->toBeNull();
+    expectt($content)->toBe('First,Second');
 });
 
 it('Expect StreamedResponse() send headers and callback call once', function () {
@@ -51,10 +51,10 @@ it('Expect StreamedResponse() send headers and callback call once', function () 
     list($response, $content) = getBuffer(function () use ($callable) {
         return (new StreamedResponse($callable))->prepare(Request::make(''))->terminate()->terminate();
     });
-    expect($response->isOk())->toBeTrue();
-    expect($response->getBody())->toBeNull();
-    expect($content)->toBe('Hello');
-    expect($callable->call)->toBe(1);
+    expectt($response->isOk())->toBeTrue();
+    expectt($response->getBody())->toBeNull();
+    expectt($content)->toBe('Hello');
+    expectt($callable->call)->toBe(1);
 });
 
 class StreamedCallbackStub

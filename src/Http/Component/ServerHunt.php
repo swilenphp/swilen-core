@@ -2,7 +2,7 @@
 
 namespace Swilen\Http\Component;
 
-use Swilen\Http\Common\Util;
+use Swilen\Http\Common\HttpCase;
 
 final class ServerHunt extends ParameterHunt
 {
@@ -22,19 +22,19 @@ final class ServerHunt extends ParameterHunt
 
         foreach ($this->params as $key => $value) {
             if (strpos($key, 'HTTP_') === 0) {
-                $headers[Util::toNormalizeHttp($key)] = $value;
+                $headers[HttpCase::toNormalizeHttp($key)] = $value;
             }
             // Add additional server headers to headers collection
             // CONTENT_* headers are not prefixed with HTTP_.
             elseif (isset($additional[$key])) {
-                $headers[Util::toNormalize($key)] = $value;
+                $headers[HttpCase::toNormalize($key)] = $value;
             }
         }
 
         if (function_exists('apache_request_headers')) {
             $apacheRequestHeaders = apache_request_headers();
             foreach ($apacheRequestHeaders as $key => $value) {
-                $key = Util::toNormalize($key);
+                $key = HttpCase::toNormalize($key);
                 if (!isset($headers[$key])) {
                     $headers[$key] = $value;
                 }

@@ -1,7 +1,7 @@
 <?php
 
 use Swilen\Security\Exception\JwtDomainException;
-use Swilen\Security\Token\OptionsValidator;
+use Swilen\Security\Jwt\OptionsValidator;
 
 uses()->group('Security', 'SignOptions');
 

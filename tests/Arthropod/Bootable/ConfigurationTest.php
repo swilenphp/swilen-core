@@ -19,7 +19,7 @@ it('Load configuration file', function () {
 
     (new Configuration())->bootstrap($app);
 
-    expect($app->make('config'))->toBeInstanceOf(ConfigRepository::class);
+    expectt($app->make('config'))->toBeInstanceOf(ConfigRepository::class);
 
     $app->setInstance(null);
 });

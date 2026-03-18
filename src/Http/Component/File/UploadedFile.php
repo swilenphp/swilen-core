@@ -59,7 +59,7 @@ class UploadedFile extends File implements UploadedFileInterface
      *
      * @return void
      */
-    public function __construct(string $path, string $name, string $type = null, int $error = null)
+    public function __construct(string $path, string $name, ?string $type = null, ?int $error = null)
     {
         $this->file  = $path;
         $this->name  = $this->normalizedFilename($name);
@@ -109,7 +109,7 @@ class UploadedFile extends File implements UploadedFileInterface
      *
      * @throws \Swilen\Http\Exception\FileException
      */
-    public function move(string $directory, string $name = null)
+    public function move(string $directory, ?string $name = null)
     {
         if (!$this->isValid()) {
             return $this->handleFileExceptions();
@@ -155,12 +155,12 @@ class UploadedFile extends File implements UploadedFileInterface
     public function getStream()
     {
         if ($this->moved) {
-            throw new \RuntimeException('Uploaded file ['.$this->name.'] has already been moved');
+            throw new \RuntimeException('Uploaded file [' . $this->name . '] has already been moved');
         }
 
         if (!$this->stream) {
             if (!is_resource($file = fopen($this->file, 'rb'))) {
-                throw new \RuntimeException('The file ['.$this->name.'] is not resource');
+                throw new \RuntimeException('The file [' . $this->name . '] is not resource');
             }
 
             $this->stream = new Stream($file);

@@ -58,7 +58,7 @@ class SupportRequest
 
         if (isset($components['port'])) {
             $server['SERVER_PORT'] = $components['port'];
-            $server['HTTP_HOST'] .= ':'.$components['port'];
+            $server['HTTP_HOST'] .= ':' . $components['port'];
         }
 
         if (isset($components['user'])) {
@@ -73,7 +73,7 @@ class SupportRequest
             $components['path'] = '/';
         }
 
-        switch (strtoupper($method)) {
+        switch (HttpCase::uppercase($method)) {
             case 'POST':
             case 'PUT':
             case 'DELETE':
@@ -106,7 +106,7 @@ class SupportRequest
             $queryString = http_build_query($query, '', '&');
         }
 
-        $server['REQUEST_URI']  = $components['path'].($queryString !== '' ? '?'.$queryString : '');
+        $server['REQUEST_URI']  = $components['path'] . ($queryString !== '' ? '?' . $queryString : '');
         $server['QUERY_STRING'] = $queryString;
 
         return [$server, $files, $request, $query, $body];
@@ -137,7 +137,7 @@ class SupportRequest
             'REQUEST_TIME' => time(),
             'REQUEST_TIME_FLOAT' => microtime(true),
             'PATH_INFO' => '',
-            'REQUEST_METHOD' => strtoupper($method),
+            'REQUEST_METHOD' => HttpCase::uppercase($method),
         ], $server);
     }
 

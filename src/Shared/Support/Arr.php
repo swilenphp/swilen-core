@@ -48,7 +48,7 @@ class Arr
             return $default;
         }
 
-        if (is_null($key)) {
+        if ($key === null) {
             return $array;
         }
 
@@ -117,7 +117,7 @@ class Arr
      */
     public static function set(&$array, $key, $value)
     {
-        if (is_null($key)) {
+        if ($key === null) {
             return $array = $value;
         }
 
@@ -151,7 +151,7 @@ class Arr
      */
     public static function wrap($value)
     {
-        return is_null($value) ? [] : (is_array($value) ? $value : [$value]);
+        return $value === null ? [] : (is_array($value) ? $value : [$value]);
     }
 
     /**

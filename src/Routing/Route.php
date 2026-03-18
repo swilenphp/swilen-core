@@ -242,7 +242,7 @@ class Route implements Arrayable, JsonSerializable
     {
         $this->compilePatternMatching();
 
-        if (preg_match('#^'.$this->matching.'$#D', rawurldecode($path), $matches)) {
+        if (preg_match('#^' . $this->matching . '$#D', rawurldecode($path), $matches)) {
             $this->matchToKeys(array_slice($matches, 1));
 
             return true;
@@ -261,7 +261,7 @@ class Route implements Arrayable, JsonSerializable
     private function matchToKeys(array $params = [])
     {
         foreach ($params as $key => $value) {
-            if (is_numeric($key) || is_null($value)) {
+            if (is_numeric($key) || $value === null) {
                 continue;
             }
 
@@ -322,7 +322,7 @@ class Route implements Arrayable, JsonSerializable
      */
     public function name(string $name)
     {
-        $this->action['as'] = isset($this->action['as']) ? $this->action['as'].$name : $name;
+        $this->action['as'] = isset($this->action['as']) ? $this->action['as'] . $name : $name;
 
         return $this;
     }
@@ -446,7 +446,7 @@ class Route implements Arrayable, JsonSerializable
      *
      * @return array<string, mixed>
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toArray();
     }

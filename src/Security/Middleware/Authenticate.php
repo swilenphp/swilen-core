@@ -5,7 +5,8 @@ namespace Swilen\Security\Middleware;
 use Swilen\Http\Exception\HttpForbiddenException;
 use Swilen\Http\Exception\HttpUnauthorizedException;
 use Swilen\Http\Request;
-use Swilen\Security\Token\Payload;
+use Swilen\Security\Exception\JwtFatalException;
+use Swilen\Security\Jwt\Payload;
 
 class Authenticate
 {
@@ -19,15 +20,25 @@ class Authenticate
      */
     public function handle(Request $request, \Closure $next)
     {
-        if (!$token = $request->bearerToken()) {
+        $rawToken = $request->bearerToken();
+        if ($rawToken === null || empty($rawToken)) {
             throw new HttpForbiddenException();
         }
 
-        if (!$result = $this->isAuthenticated($token)) {
+        try {
+            $data = $this->isAuthenticated($rawToken);
+        } catch (\Throwable $th) {
+            if ($th instanceof HttpUnauthorizedException) {
+                throw $th;
+            }
+            if ($th instanceof JwtFatalException) {
+                throw $th;
+            }
+
             throw new HttpUnauthorizedException();
         }
 
-        return $next($request->withUser($result->data()));
+        return $next($request->withUser($data->data()));
     }
 
     /**
@@ -35,9 +46,9 @@ class Authenticate
      *
      * @param string $token
      *
-     * @return \Swilen\Security\Token\Payload
+     * @return \Swilen\Security\Jwt\Payload
      */
-    protected function isAuthenticated(string $token)
+    protected function isAuthenticated(string $token): Payload
     {
         return new Payload(['data' => 'name', 'token' => $token]);
     }

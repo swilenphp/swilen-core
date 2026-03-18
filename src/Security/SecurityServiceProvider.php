@@ -4,7 +4,7 @@ namespace Swilen\Security;
 
 use Swilen\Petiole\ServiceProvider;
 use Swilen\Security\Contract\JwtService;
-use Swilen\Security\Token\Jwt;
+use Swilen\Security\Jwt\Jwt;
 
 class SecurityServiceProvider extends ServiceProvider
 {

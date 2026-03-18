@@ -3,6 +3,7 @@
 namespace Swilen\Routing;
 
 use Swilen\Http\Common\Http;
+use Swilen\Http\Common\Method;
 use Swilen\Http\Exception\HttpMethodNotAllowedException;
 use Swilen\Http\Exception\HttpNotFoundException;
 use Swilen\Http\Request;
@@ -131,7 +132,7 @@ class RouteCollection implements Arrayable, \IteratorAggregate, \Countable
      */
     protected function handleMatchedRoute(Request $request, $route)
     {
-        if (!is_null($route)) {
+        if ($route !== null) {
             return $route;
         }
 
@@ -154,7 +155,7 @@ class RouteCollection implements Arrayable, \IteratorAggregate, \Countable
         $methods = array_diff(Router::HTTP_METHODS, [$request->getMethod()]);
 
         return array_filter($methods, function ($method) use ($request) {
-            return !is_null($this->matchRoutes($this->get($method), $request));
+            return $this->matchRoutes($this->get($method), $request) !== null;
         });
     }
 
@@ -170,8 +171,8 @@ class RouteCollection implements Arrayable, \IteratorAggregate, \Countable
      */
     protected function handleRouteForMethods(Request $request, array $methods = [])
     {
-        if ($request->getMethod() === Http::METHOD_OPTIONS) {
-            return new Route(Http::METHOD_OPTIONS, $request->getPathInfo(), function () use ($methods) {
+        if ($request->getMethod() === Method::OPTIONS->value) {
+            return new Route(Method::OPTIONS->value, $request->getPathInfo(), function () use ($methods) {
                 return new Response('', 200, ['Allow' => implode(', ', $methods)]);
             });
         }

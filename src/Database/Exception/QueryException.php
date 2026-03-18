@@ -56,7 +56,7 @@ class QueryException extends \PDOException
         $result   = array_shift($segments);
 
         foreach ($segments as $segment) {
-            $result .= $this->parseToPrimitive(array_shift($bindings)).$segment;
+            $result .= $this->parseToPrimitive(array_shift($bindings)) . $segment;
         }
 
         if (strpos($sql, ':') !== false) {
@@ -85,7 +85,7 @@ class QueryException extends \PDOException
             return sprintf("'%s'", $value);
         }
 
-        if (is_null($value)) {
+        if ($value === null) {
             return '(null)';
         }
 

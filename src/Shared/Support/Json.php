@@ -77,8 +77,9 @@ final class Json
      *
      * @throws \JsonException
      */
-    public function encode(int $encodingOptions = null)
+    public function encode(?int $encodingOptions = null)
     {
+        // Reset json error state
         @json_decode('[]');
 
         $content = json_encode($this->content, $encodingOptions ?? static::$encodingOptions);
@@ -140,7 +141,7 @@ final class Json
         $code    = (int) json_last_error();
         $message = static::$errorMessages[$code] ?? json_last_error_msg() ?: 'Unknow error in encode/decode json.';
 
-        throw new \JsonException($info.': '.$message, $code);
+        throw new \JsonException($info . ': ' . $message, $code);
     }
 
     /**
@@ -153,11 +154,11 @@ final class Json
     public static function shouldBeJson($content)
     {
         return $content instanceof Arrayable ||
-               $content instanceof Jsonable ||
-               $content instanceof \ArrayObject ||
-               $content instanceof JsonSerializable ||
-               $content instanceof \stdClass ||
-               is_array($content);
+            $content instanceof Jsonable ||
+            $content instanceof \ArrayObject ||
+            $content instanceof JsonSerializable ||
+            $content instanceof \stdClass ||
+            is_array($content);
     }
 
     /**

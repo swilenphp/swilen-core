@@ -3,15 +3,13 @@
 namespace Swilen\Arthropod;
 
 use Swilen\Arthropod\Contract\ExceptionHandler;
-use Swilen\Arthropod\Exception\Handler;
+use Swilen\Arthropod\Events\AppBootedEvent;
 use Swilen\Cache\Cache;
 use Swilen\Container\Container;
-use Swilen\Events\Dispatcher;
 use Swilen\Events\EventDispatcher;
 use Swilen\Http\Request;
 use Swilen\Petiole\Facade;
 use Swilen\Pipeline\Pipeline;
-use Swilen\Routing\Router;
 use Swilen\Routing\RoutingServiceProvider;
 use Swilen\Shared\Arthropod\Application as ArthropodApplication;
 use Swilen\Shared\Arthropod\HttpApplication;
@@ -44,7 +42,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @var string[]
      */
-    protected $middleware = [
+    protected $middlewares = [
         \Swilen\Arthropod\Middleware\CorsMiddleware::class,
     ];
 
@@ -54,10 +52,18 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      * @var string[]
      */
     protected $bootstrappers = [
+        \Swilen\Arthropod\Bootable\Facades::class,
+    ];
+
+    /**
+     * The initial bootable services collection.
+     *
+     * @var string[]
+     */
+    protected $initials = [
         \Swilen\Arthropod\Bootable\EnvironmentVars::class,
         \Swilen\Arthropod\Bootable\Configuration::class,
         \Swilen\Arthropod\Bootable\ExceptionsHandler::class,
-        \Swilen\Arthropod\Bootable\Facades::class,
         \Swilen\Arthropod\Bootable\Providers::class,
     ];
 
@@ -117,6 +123,12 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     protected $environmentFile;
 
+    /**
+     * The application events.
+     *
+     * @var \Swilen\Events\EventDispatcher
+     */
+    protected readonly EventDispatcher $events;
 
     /**
      * Create http aplication instance.
@@ -131,6 +143,16 @@ class Application extends Container implements ArthropodApplication, HttpApplica
         $this->registerBaseBindings();
         $this->registerServiceProviders();
         $this->registerCoreContainerAliases();
+
+        $this->events = new EventDispatcher($this);
+    }
+
+    /**
+     * Setups initials services
+     */
+    public function setup()
+    {
+        $this->bootstrapInitials();
 
         $this->singleton(EventDispatcher::class, EventDispatcher::class);
         $this->singleton(Cache::class, Cache::class);
@@ -458,6 +480,18 @@ class Application extends Container implements ArthropodApplication, HttpApplica
     }
 
     /**
+     * Bootstrap the application with packages that implement the bootstrap contract.
+     *
+     * @return void
+     */
+    protected function bootstrapInitials()
+    {
+        foreach ($this->initials as $bootstrap) {
+            $this->make($bootstrap)->bootstrap($this);
+        }
+    }
+
+    /**
      * Boot the application with packages that implement the bootstrap contract.
      *
      * @return void
@@ -473,6 +507,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
         }
 
         $this->hasBeenBootstrapped = true;
+        $this->events->dispatch(new AppBootedEvent());
     }
 
     /**
@@ -566,13 +601,14 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     protected function dispatchRequestThroughRouter(Request $request)
     {
+        // Set request instance for use in facades and function helpers
         $this->instance('request', $request);
 
         Facade::flushFacadeInstance('request');
 
         return (new Pipeline($this))
             ->from($request)
-            ->through($this->middleware)
+            ->through($this->middlewares)
             ->then(function ($request) {
                 return $this['router']->dispatch($request);
             });

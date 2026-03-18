@@ -1,6 +1,7 @@
 <?php
 
 use Swilen\Http\Common\Http;
+use Swilen\Http\Common\Method;
 use Swilen\Http\Request;
 use Swilen\Http\Response;
 
@@ -8,34 +9,34 @@ uses()->group('Http', 'Response');
 
 it('Espect \Response instance created succesfully and is instance of \Swilen\Http\Response', function () {
     $response = new Response();
-    expect($response)->toBeObject();
-    expect($response)->toBeInstanceOf(Response::class);
-    expect($response->getStatusCode())->toBe(Http::OK);
-    expect($response->getBody())->toBeNull();
+    expectt($response)->toBeObject();
+    expectt($response)->toBeInstanceOf(Response::class);
+    expectt($response->getStatusCode())->toBe(Http::OK);
+    expectt($response->getBody())->toBeNull();
 });
 
 it('Response with empty content', function () {
     $response = new Response('testing', Http::NO_CONTENT);
     $prepared = $response->prepare(Request::make('/'));
 
-    expect($prepared->getBody())->toBeNull();
-    expect($prepared->getStatusCode())->toBe(Http::NO_CONTENT);
-    expect($prepared->isEmpty())->toBeTrue();
+    expectt($prepared->getBody())->toBeNull();
+    expectt($prepared->getStatusCode())->toBe(Http::NO_CONTENT);
+    expectt($prepared->isEmpty())->toBeTrue();
 
     $response = new Response('content-ignored');
-    expect($response->getBody())->not->toBeNull();
-    expect($response->isEmpty())->toBeFalse();
+    expectt($response->getBody())->not->toBeNull();
+    expectt($response->isEmpty())->toBeFalse();
 
     $response->setNotModified();
 
-    expect($response->isEmpty())->toBeTrue();
-    expect($response->getBody())->toBeNull();
+    expectt($response->isEmpty())->toBeTrue();
+    expectt($response->getBody())->toBeNull();
 
     $response = new Response('omited');
-    expect($response->getBody())->not->toBeNull();
+    expectt($response->getBody())->not->toBeNull();
 
-    $response->prepare(Request::make('', Http::METHOD_HEAD));
-    expect($response->getBody())->toBeNull();
+    $response->prepare(Request::make('', Method::HEAD->value));
+    expectt($response->getBody())->toBeNull();
 });
 
 it('Throw error when insert invalid status code', function () {
@@ -47,77 +48,77 @@ it('Throw error when insert invalid status code', function () {
 it('Work with status codes', function () {
     $response = new Response();
 
-    expect($response->isSuccessful())->toBeTrue();
-    expect($response->isOk())->toBeTrue();
-    expect($response->isServerError())->toBeFalse();
+    expectt($response->isSuccessful())->toBeTrue();
+    expectt($response->isOk())->toBeTrue();
+    expectt($response->isServerError())->toBeFalse();
 
     $response = $response->withStatus(100);
-    expect($response->isInformational())->toBeTrue();
-    expect($response->isOk())->toBeFalse();
+    expectt($response->isInformational())->toBeTrue();
+    expectt($response->isOk())->toBeFalse();
 
     $response = $response->withStatus(Http::NO_CONTENT);
-    expect($response->isEmpty())->toBeTrue();
-    expect($response->isOk())->toBeFalse();
+    expectt($response->isEmpty())->toBeTrue();
+    expectt($response->isOk())->toBeFalse();
 
     $response = $response->withStatus(Http::MOVED_PERMANENTLY);
-    expect($response->isRedirection())->toBeTrue();
-    expect($response->isOk())->toBeFalse();
+    expectt($response->isRedirection())->toBeTrue();
+    expectt($response->isOk())->toBeFalse();
 
     $response = $response->withStatus(400);
-    expect($response->isClientError())->toBeTrue();
-    expect($response->isOk())->toBeFalse();
+    expectt($response->isClientError())->toBeTrue();
+    expectt($response->isOk())->toBeFalse();
 
     $response = $response->withStatus(Http::NOT_FOUND);
-    expect($response->isNotFound())->toBeTrue();
-    expect($response->isClientError())->toBeTrue();
+    expectt($response->isNotFound())->toBeTrue();
+    expectt($response->isClientError())->toBeTrue();
 
     $response = $response->withStatus(500);
-    expect($response->isServerError())->toBeTrue();
-    expect($response->isClientError())->toBeFalse();
-    expect($response->isOk())->toBeFalse();
+    expectt($response->isServerError())->toBeTrue();
+    expectt($response->isClientError())->toBeFalse();
+    expectt($response->isOk())->toBeFalse();
 
     $response = $response->withStatus(403);
-    expect($response->isForbidden())->toBeTrue();
-    expect($response->isOk())->toBeFalse();
+    expectt($response->isForbidden())->toBeTrue();
+    expectt($response->isOk())->toBeFalse();
 });
 
 it('Status text in response', function () {
     $response = new Response();
-    expect($response->getReasonPhrase())->toBe('OK');
+    expectt($response->getReasonPhrase())->toBe('OK');
 
     $response->withStatus(100);
-    expect($response->getReasonPhrase())->toBe('Continue');
+    expectt($response->getReasonPhrase())->toBe('Continue');
 });
 
 it('Insert header succesfully', function () {
     $response = new Response();
     $response->withHeader('Fo', 'bar');
-    expect($response->headers->get('Fo'))->toBe('bar');
+    expectt($response->headers->get('Fo'))->toBe('bar');
 
     $response->withHeaders([
         'bar-1' => 'foo',
         'foo-1' => 'bar',
     ]);
-    expect($response->headers->all())->toHaveKeys(['Fo', 'bar-1', 'foo-1']);
+    expectt($response->headers->all())->toHaveKeys(['Fo', 'bar-1', 'foo-1']);
 
     $response = $response->header('X-Key', 'x-value');
-    expect($response->headers->has('X-Key'))->toBeTrue();
+    expectt($response->headers->has('X-Key'))->toBeTrue();
 
     $response = $response->headers([
         'x-header' => 'data',
         'x-token' => 'data-token',
     ]);
 
-    expect($response->headers->has('x-header'))->toBeTrue();
-    expect($response->headers->has('x-token'))->toBeTrue();
+    expectt($response->headers->has('x-header'))->toBeTrue();
+    expectt($response->headers->has('x-token'))->toBeTrue();
 });
 
 it('Interact with response body', function () {
     $response = new Response();
 
-    expect($response->getBody())->toBeNull();
+    expectt($response->getBody())->toBeNull();
     $response = $response->withBody('test');
-    expect($response->getBody())->toBe('test');
+    expectt($response->getBody())->toBe('test');
 });
 
 it('Body to send client', function () {
@@ -126,53 +127,53 @@ it('Body to send client', function () {
         return (new Response('simple-text'))->prepare(Request::make(''))->terminate();
     });
 
-    expect($content)->toBe('simple-text');
-    expect($response->headers->get('Content-Type'))->toBeIn(['text/html', 'text/html; charset=utf-8']);
-    expect($response->getBody())->toBe('simple-text');
+    expectt($content)->toBe('simple-text');
+    expectt($response->headers->get('Content-Type'))->toBeIn(['text/html', 'text/html; charset=utf-8']);
+    expectt($response->getBody())->toBe('simple-text');
 });
 
 it('Content-Type and charset fixed in response', function () {
     $response = new Response(null);
 
-    expect($response->headers->get('Content-Type'))->toBeNull();
+    expectt($response->headers->get('Content-Type'))->toBeNull();
 
     $response->withHeader('Content-Type', 'text/html');
-    expect($response->headers->get('Content-Type'))->not->toBeNull();
+    expectt($response->headers->get('Content-Type'))->not->toBeNull();
 
     $response->prepare(Request::make(''));
-    expect($response->headers->get('Content-Type'))->toMatch('/^text\/html;\scharset=+/');
+    expectt($response->headers->get('Content-Type'))->toMatch('/^text\/html;\scharset=+/');
 });
 
 it('Fix content length when found Transfer-Encoding present', function () {
     $response = new Response(null);
 
     $response->withHeader('Transfer-Encoding', 'gzip')->prepare(Request::make(''));
-    expect($response->headers->has('Content-Length'))->toBeFalse();
+    expectt($response->headers->has('Content-Length'))->toBeFalse();
 });
 
 it('Fix cache headers based in server protocol', function () {
     $response = new Response();
 
-    expect($response->getProtocolVersion())->toBe('1.0');
+    expectt($response->getProtocolVersion())->toBe('1.0');
     $response->prepare(Request::make(''));
-    expect($response->getProtocolVersion())->toBe('1.1');
+    expectt($response->getProtocolVersion())->toBe('1.1');
 
     $response = (new Response(null, 200, [
         'Cache-Control' => 'no-cache',
     ]))->prepare(Request::make('/'));
 
-    expect($response->hasHeader('pragma'))->toBeTrue();
-    expect($response->hasHeader('expires'))->toBeTrue();
+    expectt($response->hasHeader('pragma'))->toBeTrue();
+    expectt($response->hasHeader('expires'))->toBeTrue();
 });
 
 it('finish request with fastcgi_finish_request', function () {
     list($response, $content) = getBuffer(function () {
-		mockFinishRequestFunc();
+        mockFinishRequestFunc();
         return (new Response())->prepare(Request::make('/'))->terminate();
     });
 
-    expect($content)->toBe('');
-    expect($response->getBody())->toBeNull();
+    expectt($content)->toBe('');
+    expectt($response->getBody())->toBeNull();
 });
 
 function mockFinishRequestFunc()

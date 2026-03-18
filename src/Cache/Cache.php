@@ -2,7 +2,7 @@
 
 namespace Swilen\Cache;
 
-use Swilen\Shared\Support\Optional;
+use Swilen\Shared\Support\Option;
 
 class Cache
 {
@@ -20,24 +20,24 @@ class Cache
     }
 
     /**
-     * @return Optional<mixed>
+     * @return Option<mixed>
      */
-    public function get(string $key): Optional
+    public function get(string $key): Option
     {
         if (!isset($this->items[$key])) {
-            return Optional::empty();
+            return Option::empty();
         }
 
         $node = $this->items[$key];
 
         if ($node->expired()) {
             $this->delete($key);
-            return Optional::empty();
+            return Option::empty();
         }
 
         $this->moveToFront($node);
 
-        return Optional::of($node->value);
+        return Option::of($node->value);
     }
 
     /**

@@ -26,8 +26,8 @@ it('Match route current request', function () {
     /** @var Response */
     $response = $this->router->dispatch(fetch('/test'));
 
-    expect($response)->toBeInstanceOf(Response::class);
-    expect($response->getBody())->toBeJson();
+    expectt($response)->toBeInstanceOf(Response::class);
+    expectt($response->getBody())->toBeJson();
 });
 
 it('Throw not found if route not matches', function () {
@@ -46,7 +46,7 @@ it('Throw if current method not implement in routes collection', function () {
     /** @var \Swilen\Http\Response */
     $response = $this->router->dispatch(fetch('/testing', 'POST'));
 
-    expect($response->headers->all())->toHaveKey('Allow');
+    expectt($response->headers->all())->toHaveKey('Allow');
 })->throws(HttpMethodNotAllowedException::class, 'The POST method is not supported. Must be one of: GET.');
 
 it('Routing register shared middleware and return throw if bearer token not found in header', function () {
@@ -83,19 +83,19 @@ it('Route attributes as registered', function () {
         return $response;
     });
 
-    expect($route->getPattern())->toBe('/hello/{world}');
-    expect($route->getName())->toBe('api.hello');
-    expect($route->getMiddleware())->toBeArray();
-    expect($route->getAction('uses'))->toBeCallable();
-    expect($route->getAction())->not->toHaveKey('controller');
+    expectt($route->getPattern())->toBe('/hello/{world}');
+    expectt($route->getName())->toBe('api.hello');
+    expectt($route->getMiddleware())->toBeArray();
+    expectt($route->getAction('uses'))->toBeCallable();
+    expectt($route->getAction())->not->toHaveKey('controller');
 
     $response = $this->router->dispatch(fetch('/hello/lima'));
 
-    expect($response->getBody())->toBeNumeric();
-    expect($response->headers->get('Fo'))->toBe('bar');
+    expectt($response->getBody())->toBeNumeric();
+    expectt($response->headers->get('Fo'))->toBe('bar');
 
-    expect($route->parameter('world'))->toBe('lima');
-    expect($route->getParameters())->not->toBeEmpty();
+    expectt($route->parameter('world'))->toBe('lima');
+    expectt($route->getParameters())->not->toBeEmpty();
 });
 
 it('Shared route attributes registered', function () {
@@ -115,18 +115,18 @@ it('Shared route attributes registered', function () {
 
     $response = $this->router->dispatch(fetch('/name/route/cuzco'));
 
-    expect($response->getBody())->toBeJson();
-    expect($response->headers->get('Use-Token'))->toBe('true');
+    expectt($response->getBody())->toBeJson();
+    expectt($response->headers->get('Use-Token'))->toBe('true');
 
     /** @var \Swilen\Routing\Route */
     $route = $this->router->current();
 
-    expect($route->getPattern())->toBe('/name/route/{match}');
-    expect($route->getName())->toBeNull();
-    expect($route->getMiddleware())->toBeArray();
-    expect($route->getAction('uses'))->toBeCallable();
-    expect($route->getAction())->not->toHaveKey('controller');
-    expect($route->parameter('match'))->toBe('cuzco');
+    expectt($route->getPattern())->toBe('/name/route/{match}');
+    expectt($route->getName())->toBeNull();
+    expectt($route->getMiddleware())->toBeArray();
+    expectt($route->getAction('uses'))->toBeCallable();
+    expectt($route->getAction())->not->toHaveKey('controller');
+    expectt($route->parameter('match'))->toBe('cuzco');
 });
 
 it('Route created with given http method by router method', function () {
@@ -137,14 +137,14 @@ it('Route created with given http method by router method', function () {
 
     $get = $router->get('/', $handler);
 
-    expect($get)->toBeInstanceOf(Route::class);
-    expect($get->getMethod())->toBe('GET');
+    expectt($get)->toBeInstanceOf(Route::class);
+    expectt($get->getMethod())->toBe('GET');
 
-    expect($router->post('', $handler)->getMethod())->toBe('POST');
-    expect($router->put('', $handler)->getMethod())->toBe('PUT');
-    expect($router->delete('', $handler)->getMethod())->toBe('DELETE');
-    expect($router->patch('', $handler)->getMethod())->toBe('PATCH');
-    expect($router->options('', $handler)->getMethod())->toBe('OPTIONS');
+    expectt($router->post('', $handler)->getMethod())->toBe('POST');
+    expectt($router->put('', $handler)->getMethod())->toBe('PUT');
+    expectt($router->delete('', $handler)->getMethod())->toBe('DELETE');
+    expectt($router->patch('', $handler)->getMethod())->toBe('PATCH');
+    expectt($router->options('', $handler)->getMethod())->toBe('OPTIONS');
 });
 
 it('Get all routes as RouteCollection instance from a router', function () {
@@ -153,5 +153,5 @@ it('Get all routes as RouteCollection instance from a router', function () {
         return 5;
     };
 
-    expect($router->routes())->toBeInstanceOf(RouteCollection::class);
+    expectt($router->routes())->toBeInstanceOf(RouteCollection::class);
 });

@@ -72,19 +72,4 @@ interface Http
     public const LOOP_DETECTED                        = 508;
     public const NOT_EXTENDED                         = 510;
     public const NETWORK_AUTHENTICATION_REQUIRED      = 511;
-
-    /**
-     * The all HTTP server methods.
-     *
-     * @var string
-     */
-    public const METHOD_OPTIONS = 'OPTIONS';
-    public const METHOD_GET     = 'GET';
-    public const METHOD_POST    = 'POST';
-    public const METHOD_PUT     = 'PUT';
-    public const METHOD_PATCH   = 'PATCH';
-    public const METHOD_DELETE  = 'DELETE';
-    public const METHOD_TRACE   = 'TRACE';
-    public const METHOD_CONNECT = 'CONNECT';
-    public const METHOD_HEAD    = 'HEAD';
 }

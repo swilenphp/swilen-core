@@ -3,6 +3,7 @@
 namespace Swilen\Http\Response;
 
 use Swilen\Http\Common\Http;
+use Swilen\Http\Common\Method;
 use Swilen\Http\Component\File\File;
 use Swilen\Http\Component\ResponseHeaderHunt;
 use Swilen\Http\Exception\FileException;
@@ -110,7 +111,8 @@ class BinaryFileResponse extends Response
     public function updateFilename(string $filename)
     {
         $this->headers->makeDisposition(
-            $this->disposition ?? ResponseHeaderHunt::DISPOSITION_ATTACHMENT, $filename
+            $this->disposition ?? ResponseHeaderHunt::DISPOSITION_ATTACHMENT,
+            $filename
         );
 
         return $this;
@@ -152,7 +154,7 @@ class BinaryFileResponse extends Response
             $this->headers->set('Accept-Ranges', $request->isMethodSafe() ? 'bytes' : 'none');
         }
 
-        if ($request->headers->has('Range') && $request->getMethod() === Http::METHOD_GET) {
+        if ($request->headers->has('Range') && $request->getMethod() === Method::GET) {
             // Process the range headers.
             if (!$request->headers->has('If-Range')) {
                 $range = $request->headers->get('Range');
@@ -187,7 +189,7 @@ class BinaryFileResponse extends Response
             }
         }
 
-        if ($request->getMethod() === Http::METHOD_HEAD) {
+        if ($request->getMethod() === Method::HEAD) {
             $this->maxlen = 0;
         }
 
