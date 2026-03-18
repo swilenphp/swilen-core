@@ -128,7 +128,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @var \Swilen\Events\EventDispatcher
      */
-    protected readonly EventDispatcher $events;
+    public readonly EventDispatcher $events;
 
     /**
      * Create http aplication instance.
