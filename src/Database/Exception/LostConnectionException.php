@@ -5,6 +5,13 @@ namespace Swilen\Database\Exception;
 class LostConnectionException extends \RuntimeException
 {
     /**
+     * The PDO error info.
+     *
+     * @var array|null
+     */
+    public $errorInfo;
+
+    /**
      * Create a new query exception instance.
      *
      * @param int        $attempts
@@ -17,13 +24,10 @@ class LostConnectionException extends \RuntimeException
     {
         parent::__construct('', 0, $previous);
 
-        $this->code     = (int) $previous instanceof \Throwable ? $previous->getCode() : 2002;
+        $this->code     = $previous instanceof \Throwable ? $previous->getCode() : 2002;
         $this->message  = $this->formatMessage($previous, $attempts . ' reconnection attempts in ' . $time . ' ms.');
 
         if ($previous instanceof \PDOException) {
-            /**
-             * @var mixed $this
-             */
             $this->errorInfo = $previous->errorInfo;
         }
     }

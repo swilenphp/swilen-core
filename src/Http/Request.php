@@ -215,6 +215,16 @@ class Request extends SupportRequest implements \ArrayAccess
     }
 
     /**
+     * Get client ip address.
+     *
+     * @return string
+     */
+    public function getClientIp()
+    {
+        return $this->server->get('REMOTE_ADDR');
+    }
+
+    /**
      * Gets the "real" request method.
      *
      * @return string

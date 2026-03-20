@@ -12,7 +12,6 @@ beforeAll(function () {
     $app = new Application(dirname(__DIR__));
 
     $app->useEnvironmentPath(dirname(__DIR__));
-
     $app->singleton(
         \Swilen\Arthropod\Contract\ExceptionHandler::class,
         \Swilen\Arthropod\Exception\Handler::class

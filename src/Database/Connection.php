@@ -538,11 +538,11 @@ class Connection implements ConnectionContract
     /**
      * Get the elapsed time since a given starting point.
      *
-     * @param int $start
+     * @param float $start
      *
      * @return float
      */
-    protected function getElapsedTime(int $start)
+    protected function getElapsedTime(float $start)
     {
         return round((microtime(true) - $start) * 1000, 2);
     }

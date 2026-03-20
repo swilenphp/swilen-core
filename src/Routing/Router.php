@@ -56,7 +56,15 @@ class Router implements RouterContract
      * @var string[]
      */
     protected const ALL_HTTP_METHODS = [
-        'OPTIONS', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'TRACE', 'CONNECT', 'HEAD',
+        'OPTIONS',
+        'GET',
+        'POST',
+        'PUT',
+        'PATCH',
+        'DELETE',
+        'TRACE',
+        'CONNECT',
+        'HEAD',
     ];
 
     /**
@@ -275,11 +283,11 @@ class Router implements RouterContract
     {
         if ($routes instanceof \Closure) {
             $result = $routes($this);
-        } elseif (is_file($routes)) {
+        } elseif (is_string($routes) && is_file($routes)) {
             require_once $routes;
         }
 
-        if (is_file($result)) {
+        if (is_string($result) && is_file($result)) {
             require_once $result;
         }
     }
@@ -293,7 +301,7 @@ class Router implements RouterContract
      */
     protected function prefix($uri)
     {
-        return '/'.trim(trim($this->getLastGroupPrefix(), '/').'/'.trim($uri, '/'), '/') ?: '/';
+        return '/' . trim(trim($this->getLastGroupPrefix(), '/') . '/' . trim($uri, '/'), '/') ?: '/';
     }
 
     /**

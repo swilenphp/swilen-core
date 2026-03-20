@@ -79,6 +79,22 @@ final class Env
 	}
 
 	/**
+	 * Create environment instance from given array.
+	 *
+	 * @param array<string, mixed> $envs
+	 * @param bool                 $isImmutable
+	 *
+	 * @return $this
+	 */
+	public static function createFromArray(array $envs, bool $isImmutable = true)
+	{
+		$instance = new static(null, $isImmutable);
+		$instance->loadFromArray($envs);
+
+		return $instance;
+	}
+
+	/**
 	 * Return full file path of env.
 	 *
 	 * @return string

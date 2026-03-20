@@ -44,6 +44,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     protected $middlewares = [
         \Swilen\Arthropod\Middleware\CorsMiddleware::class,
+        \Swilen\Arthropod\Middleware\LoggerMiddleware::class,
     ];
 
     /**
@@ -579,9 +580,9 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     public function handle(Request $request)
     {
-        $this->bootstrap();
-
         try {
+            $this->bootstrap();
+
             $response = $this->dispatchRequestThroughRouter($request);
         } catch (\Throwable $e) {
             $this->reportException($e);
