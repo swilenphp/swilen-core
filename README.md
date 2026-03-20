@@ -1,138 +1,112 @@
 # Swilen
 
-Swilen is an experimental re-architecture of WordPress designed for the modern web.
+Swilen is a lightweight, high-performance backend framework built on top of OpenSwoole.
 
-It provides an **async, event-driven runtime** and a **headless-first architecture**, while maintaining compatibility with existing WordPress plugins through a legacy compatibility layer.
+It is designed for modern applications that require **async execution**, **scalability**, and a **modular architecture**, without unnecessary complexity.
 
-The goal of Swilen is to modernize the WordPress ecosystem without forcing developers, designers, or content creators to abandon the tools they already use.
-
----
+> Build fast systems with a simple, powerful foundation.
 
 ## Vision
 
-WordPress powers a huge portion of the web, but its architecture was designed for a synchronous PHP environment from the early 2000s.
+Most backend systems are still built around synchronous request lifecycles.
 
-Swilen explores what WordPress could look like if it were built today:
+Swilen takes a different approach:
 
-- Async runtime
-- Event-driven architecture
-- Headless by default
-- Modern plugin API
-- Backwards compatibility with existing plugins
+- async-first execution
+- persistent runtime
+- event-driven design
+- composable architecture
 
----
+> Less overhead. More control. Better performance.
 
-## Core Principles
+## What is Swilen?
 
-### 1. Headless First
+Swilen is a backend framework for building:
 
-Swilen behaves as a headless CMS by default.
+- APIs
+- CMS platforms
+- SaaS applications
+- real-time systems
+- distributed services
 
-Themes are only loaded if they are detected.
+It provides the core building blocks you need — without forcing a specific pattern or use case.
 
-```
+## Core Features
 
-Request → API → Content Service → JSON Response
+### ⚡ Async Runtime (OpenSwoole)
 
-```
+Swilen runs on OpenSwoole, enabling:
 
-Traditional theme rendering remains optional for compatibility.
-
----
-
-### 2. Async Runtime
-
-Swilen runs on an async server runtime (such as Swoole), enabling:
-
-- persistent workers
-- connection pooling
+- persistent workers (no cold start per request)
 - async I/O
-- faster request handling
+- connection reuse
+- high concurrency
 
----
+### 🧩 Dependency Injection (DI)
 
-### 3. Event-Driven Core
+- service container
+- automatic resolution
+- modular design
 
-The core is built around an event bus instead of procedural hooks.
+### 🧠 Event Bus
 
-Example:
+Swilen is built around an event-driven core:
 
 ```php
-Event::listen(PostPublished::class, function ($post) {
-    SearchIndexer::index($post);
+Event::listen(UserRegistered::class, function ($user) {
+    Mailer::sendWelcome($user);
 });
 ```
 
----
+### 🌐 Routing
 
-### 4. Legacy Compatibility Layer
+- flexible routing system
+- middleware support
+- REST-first design
 
-Existing WordPress plugins can continue to work using a compatibility adapter.
+### 🔐 Security (JWT)
 
-Swilen implements the classic WordPress plugin contract:
+- built-in JWT authentication
+- stateless API security
+- easy integration with clients
 
-- `add_action`
-- `add_filter`
-- global APIs
-- common WordPress classes
+### 🗄️ Database Layer
 
-This allows many existing plugins to run without modification.
+- database-agnostic
+- query builder
+- schema builder
+- flexible drivers
 
----
+### ⚡ Cache
 
-### 5. Modern Plugin API
+- in-memory or external stores
+- simple API
+- performance-focused
 
-New plugins can use a modern architecture based on events, services, and dependency injection.
+### 🔄 Background Jobs & Cron
 
-Example:
+- async jobs
+- scheduled tasks
+- non-blocking execution
 
-```php
-class SeoPlugin implements Plugin
-{
-    public function boot(App $app)
-    {
-        $app->events->listen(PostPublished::class, function ($post) {
-            Sitemap::update($post);
-        });
-    }
-}
-```
+### 🔌 Modular Architecture
 
----
+Swilen is designed to be extended:
 
-## Architecture Overview
+- modules
+- services
 
-```
-HTTP Server (Async Runtime)
-        │
-        ▼
-Swilen Core
-        │
- ┌───────────────┬───────────────┐
- │ Modern Plugin │ Legacy Plugin │
- │ API (Events)  │ API (Hooks)   │
- └───────────────┴───────────────┘
-        │
-        ▼
-Content / Users / Media Services
-```
+## Communication Layer
 
-## Goals
+Swilen supports modern communication strategies:
 
-- Improve performance and scalability
-- Enable async workloads
-- Provide a modern developer experience
-- Preserve compatibility with the WordPress ecosystem
+- **gRPC** for high-performance service communication (in roadmap)
 
-## Status
+These enable:
 
-Swilen is currently an experimental project exploring a modern architecture for WordPress-like systems.
-
-The API and internal design may change frequently.
-
-## Inspiration
-
-Swilen is inspired by modern headless CMS platforms and async runtimes while remaining compatible with the WordPress ecosystem.
+- microservices architectures
+- distributed systems
+- efficient internal communication
 
 ## License
 
