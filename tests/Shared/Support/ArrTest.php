@@ -97,7 +97,7 @@ class UserStoreJsonSerializableStub implements JsonSerializable
 
 function makeArrayAccess(array $items = [])
 {
-    return new class($items) implements ArrayAccess {
+    return new class ($items) implements ArrayAccess {
         public $items = [];
 
         public function __construct(array $items)

@@ -25,7 +25,7 @@ interface Container extends ContainerInterface
      *
      * @return void
      */
-    public function bind(string $service, $abstract = null, $shared = false): void;
+    public function bind(string $service, $abstract = null, bool $shared = false): void;
 
     /**
      * Unbind service from container.

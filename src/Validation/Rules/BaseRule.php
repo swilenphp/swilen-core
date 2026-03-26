@@ -49,7 +49,7 @@ abstract class BaseRule
      *
      * @return void
      */
-    public function __construct($value = null, string $attribute = null)
+    public function __construct($value = null, ?string $attribute = null)
     {
         $this->value     = $value;
         $this->attribute = $attribute;

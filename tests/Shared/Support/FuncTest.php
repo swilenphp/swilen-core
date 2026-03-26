@@ -18,7 +18,7 @@ it('Pipe with closures', function () {
         return $value + 10;
     };
 
-    $tax = new class {
+    $tax = new class () {
         public function __invoke(int $result)
         {
             return $result + ($result / 10);

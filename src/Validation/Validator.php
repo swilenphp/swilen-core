@@ -133,7 +133,10 @@ class Validator implements ValidatorContract, Arrayable
             [$rule, $params] = $this->parseStringRule($_rule);
 
             $this->validateRuleWithAtrributes(
-                $rule, $value, $attribute, $params
+                $rule,
+                $value,
+                $attribute,
+                $params
             );
         }
     }

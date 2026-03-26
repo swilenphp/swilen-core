@@ -19,7 +19,7 @@ final class Str
         return static::compare(
             $haystack,
             $needles,
-            fn($h, $n) =>
+            fn ($h, $n) =>
             $n !== '' && str_contains($h, $n)
         );
     }
@@ -37,7 +37,7 @@ final class Str
         return static::compare(
             $haystack,
             $needles,
-            fn($h, $n) =>
+            fn ($h, $n) =>
             str_starts_with($h, $n)
         );
     }
@@ -55,7 +55,7 @@ final class Str
         return static::compare(
             $haystack,
             $needles,
-            fn($h, $n) =>
+            fn ($h, $n) =>
             str_ends_with($h, $n)
         );
     }
@@ -144,30 +144,6 @@ final class Str
      */
     public static function slug(string $title, string $divider = '-', string $default = 'n-a'): string
     {
-        // // transliterate
-        // $title = iconv('UTF-8', 'ASCII//TRANSLIT', $title) ?: $title;
-
-        // // Convert all dashes/underscores into separator
-        // $flip = $divider === '-' ? '_' : '-';
-
-        // $title = preg_replace('![' . preg_quote($flip) . ']+!u', $divider, $title);
-
-        // // Replace @ with the word 'at'
-        // $title = str_replace('@', $divider . 'at' . $divider, $title);
-
-        // // Remove all characters that are not the divider, letters, numbers, or whitespace.
-        // $title = preg_replace(
-        //     '![' . preg_quote($divider) . '\pL\pN\s]+!u',
-        //     '',
-        //     mb_strtolower($title)
-        // );
-
-        // // Replace all divider characters and whitespace by a single divider
-        // $title = preg_replace('![' . preg_quote($divider) . '\s]+!u', $divider, $title);
-
-        // return trim($title, $divider) ?: $default;
-
-
         // transliterate
         $title = iconv('utf-8', 'us-ascii//TRANSLIT', $title);
 
