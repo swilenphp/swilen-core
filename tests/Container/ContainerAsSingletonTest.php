@@ -5,7 +5,9 @@ use Swilen\Container\Container;
 uses()->group('Container');
 
 it('Set instance for interact as singleton', function () {
-    $container = Container::setInstance(new Container());
+    Container::setInstance(new Container());
+
+    $container = Container::getInstance();
     expectt($container)->toBeInstanceOf(Container::class);
 
     unset($container);
@@ -18,4 +20,6 @@ it('Get container as singleton instance', function () {
     expectt($instance)->toBeInstanceOf(Container::class);
 
     expectt($instance->getInstance())->toBeTruthy();
+
+    unset($instance);
 });

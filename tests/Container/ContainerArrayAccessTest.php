@@ -54,7 +54,7 @@ it('Resolve the target when inserted into the container it is treated as an arra
     };
 
     $this->container['depend'] = function ($app) {
-        return new class() {
+        return new class () {
             public function __invoke(MongoRepositoryStub $repository)
             {
                 return $repository->find();

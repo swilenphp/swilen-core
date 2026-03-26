@@ -108,4 +108,6 @@ class VariadicClassStub
     }
 }
 
-interface NotInstantiableStub {}
+interface NotInstantiableStub
+{
+}

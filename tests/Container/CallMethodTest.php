@@ -78,7 +78,7 @@ it('Call __invoke function was class is used as function', function () {
         return new UserRepositoryStub(100);
     });
 
-    $class = new class() {
+    $class = new class () {
         public function __invoke(MongoRepositoryStub $repository)
         {
             return $repository->find();

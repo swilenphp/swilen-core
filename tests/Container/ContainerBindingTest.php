@@ -11,7 +11,7 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    unset($this->constainer);
+    unset($this->container);
 });
 
 it('Wait for the container instance not to be broken', function () {

@@ -16,7 +16,7 @@ final class Helper
      *
      * @return string|null
      */
-    public static function getParameterClassName($parameter)
+    public static function getParameterClassName(\ReflectionParameter $parameter): ?string
     {
         $type = $parameter->getType();
 

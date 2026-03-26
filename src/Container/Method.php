@@ -22,7 +22,7 @@ final class Method
      * @throws \ReflectionException
      * @throws \InvalidArgumentException
      */
-    public static function call($container, $callback, array $parameters = [], string $defaultMethod = null)
+    public static function call($container, $callback, array $parameters = [], ?string $defaultMethod = null)
     {
         if (is_string($callback) && !$defaultMethod && method_exists($callback, '__invoke')) {
             $defaultMethod = '__invoke';

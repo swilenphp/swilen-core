@@ -19,9 +19,15 @@ it('Get parameters from Reflection class', function () {
 
 class GetParameterClassNameStub
 {
-    public function __construct(Closure $callback, int $age) {}
+    public function __construct(Closure $callback, int $age)
+    {
+    }
 
-    public function method(ReflectionObject $callback) {}
+    public function method(ReflectionObject $callback)
+    {
+    }
 }
 
-class ExtendingParameterNamedStub extends GetParameterClassNameStub {}
+class ExtendingParameterNamedStub extends GetParameterClassNameStub
+{
+}
