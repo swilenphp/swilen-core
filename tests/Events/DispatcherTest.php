@@ -1,10 +1,8 @@
 <?php
 
-use Swilen\Events\Event;
-use Swilen\Events\EventDispatcher;
-use Swilen\Events\Listener;
 use Swilen\Arthropod\Application;
 use Swilen\Container\Container;
+use Swilen\Events\EventDispatcher;
 
 uses()->group('Events', 'Dispatcher');
 
@@ -53,8 +51,10 @@ it('listeners receive Event object when event is string', function () {
 it('listeners receive original Event object', function () {
     $eventReceived = null;
 
-    $customEvent = new class('custom.event', ['data' => 'test']) {
-        public function __construct(public string $eventName, public array $eventPayload) {}
+    $customEvent = new class ('custom.event', ['data' => 'test']) {
+        public function __construct(public string $eventName, public array $eventPayload)
+        {
+        }
         public function name(): string
         {
             return $this->eventName;
@@ -79,7 +79,9 @@ it('listeners receive original Event object CustomEvent', function () {
 
     class CustomEvent
     {
-        public function __construct(public string $eventName, public array $eventPayload) {}
+        public function __construct(public string $eventName, public array $eventPayload)
+        {
+        }
         public function name(): string
         {
             return $this->eventName;
@@ -164,7 +166,7 @@ it('works with application container', function () {
     $app = new Application(dirname(__DIR__));
     Container::setInstance($app);
 
-    $app->singleton(EventDispatcher::class, fn() => new EventDispatcher());
+    $app->singleton(EventDispatcher::class, fn () => new EventDispatcher());
 
     $called = false;
     dispatcher()->listen('app.event', function () use (&$called) {

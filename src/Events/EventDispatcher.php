@@ -41,7 +41,8 @@ class EventDispatcher implements Dispatcher
     public function __construct(
         protected ?Container $container = null,
         protected ?Queue $queue = null
-    ) {}
+    ) {
+    }
 
     /**
      * {@inheritdoc}
