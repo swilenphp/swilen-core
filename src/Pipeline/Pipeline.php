@@ -73,7 +73,9 @@ class Pipeline implements PipelineContract
     public function then(\Closure $destination)
     {
         $pipeline = array_reduce(
-            array_reverse($this->pipes), $this->carryPipes(), $this->prepareDestination($destination)
+            array_reverse($this->pipes),
+            $this->carryPipes(),
+            $this->prepareDestination($destination)
         );
 
         return $pipeline($this->target);
