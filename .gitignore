@@ -36,6 +36,15 @@ build/
 /runtime/
 /storage/
 
+# Utilities cache
+.php-cs-fixer.cache
+.phpunit.cache
+.phpunit.result.cache
+.phpstan.cache
+.phpinsights.cache
+.phpmd.cache
+.phpcpd.cache
+
 # Coverage
 coverage/
 *.lcov

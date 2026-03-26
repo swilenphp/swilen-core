@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<ruleset name="Swilen Core Coding Standards">
+    <description>PHP coding standards for Swilen Core Coding Standards</description>
+
+    <rule ref="PSR12"/>
+</ruleset>

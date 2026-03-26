@@ -27,12 +27,15 @@
         "psr/container": "^2.0",
 		"psr/log": "^1.1",
 		"psr/http-message": "^1.0",
-		"openswoole/core": "^26.2"
+		"openswoole/core": "^26.2",
+		"nikic/fast-route": "^1.3"
 	},
 	"require-dev": {
 		"pestphp/pest": "^1.21",
 		"mockery/mockery": "^1.5",
-		"openswoole/ide-helper": "^26.2"
+		"openswoole/ide-helper": "^26.2",
+		"friendsofphp/php-cs-fixer": "^3.94",
+		"squizlabs/php_codesniffer": "^4.0"
 	},
 	"config": {
 		"allow-plugins": {
@@ -45,7 +48,10 @@
 		}
 	},
 	"scripts": {
-		"dev": "php -S localhost:7050 -t public",
+		"dev": "php -S localhost:8000 -t public",
+		"dev:runtime": "php public/index.php",
+		"fmt": "php-cs-fixer fix",
+		"lint": "php -l src/ tests/",
 		"test": "./vendor/bin/pest",
 		"test:unit": "./vendor/bin/pest --group unit",
 		"test:integration": "./vendor/bin/pest --group integration",
