@@ -2,13 +2,41 @@
 
 namespace Swilen\Arthropod\Contract;
 
-use Swilen\Arthropod\Application;
-use Swilen\Http\Request;
-use Swilen\Http\Response;
+use Swilen\Shared\Container\Container;
 
 interface RuntimeContract
 {
-    public function bootstrap(): void;
+    /**
+     * Update the runtime server settings.
+     *
+     * @param array $settings
+     *
+     * @return void
+     */
+    public function updateSettings(array $settings): void;
 
+    /**
+     * Set the container instance for the runtime.
+     *
+     * @param \Swilen\Container\Container $container
+     *
+     * @return void
+     */
+    public function setContainer(Container $container): void;
+
+    /**
+     * Run the application with the given HTTP kernel.
+     *
+     * @param \Swilen\Arthropod\Contract\HttpKernel $kernel
+     *
+     * @return void
+     */
     public function run(HttpKernel $kernel): void;
+
+    /**
+     * Shutdown the runtime server gracefully.
+     *
+     * @return void
+     */
+    public function shutdown(): void;
 }

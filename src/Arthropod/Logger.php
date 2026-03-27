@@ -39,7 +39,7 @@ class Logger extends AbstractLogger
     public function __construct(string $directory, ?\DateTimeZone $timezone = null)
     {
         $this->directory = $directory;
-        $this->timezone  = $timezone ?: new \DateTimeZone('UTC');
+        $this->timezone = $timezone ?: new \DateTimeZone('UTC');
     }
 
     /**
@@ -65,11 +65,11 @@ class Logger extends AbstractLogger
     {
         $path = $this->directory . DIRECTORY_SEPARATOR . ('swilen-' . $this->formatTime() . '.log');
 
-        if (file_exists($path) && is_writable($path)) {
+        if (\file_exists($path) && \is_writable($path)) {
             return $path;
         }
 
-        if (@touch($path)) {
+        if (@\touch($path)) {
             return $path;
         }
     }
@@ -88,7 +88,7 @@ class Logger extends AbstractLogger
 
         $level = $this->determineContextLogging($level ?? LogLevel::WARNING);
 
-        return sprintf('[%s] %s: %s.  %s' . PHP_EOL, $this->formatTime(null), $level, (string) $message, $context);
+        return \sprintf('[%s] %s: %s.  %s' . PHP_EOL, $this->formatTime(null), $level, (string) $message, $context);
     }
 
     /**
@@ -100,11 +100,11 @@ class Logger extends AbstractLogger
      */
     private function determineContextLogging($level)
     {
-        for ($i = 0; $i < strlen($level); $i++) {
-            $level[$i] = chr(ord($level[$i]) - 32);
+        for ($i = 0; $i < \strlen($level); $i++) {
+            $level[$i] = \chr(\ord($level[$i]) - 32);
         }
 
-        return 'swilen.[' . $level . ']';
+        return '[' . $level . ']';
     }
 
     /**

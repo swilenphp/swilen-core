@@ -12,8 +12,8 @@ class JsonFormatter implements ExceptionFormatter
      *
      * @var int
      */
-    protected $encodingOptions = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION
-        | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_PRETTY_PRINT;
+    protected $encodingOptions = \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE | \JSON_PRESERVE_ZERO_FRACTION
+        | \JSON_INVALID_UTF8_SUBSTITUTE | \JSON_PARTIAL_OUTPUT_ON_ERROR | \JSON_PRETTY_PRINT;
 
     /**
      * The current exception passed.
@@ -63,14 +63,14 @@ class JsonFormatter implements ExceptionFormatter
     {
         return $this->debugMode
             ? [
-                'type' => get_class($exception),
+                'type' => \get_class($exception),
                 'message' => $exception->getMessage(),
                 'code' => $exception->getCode(),
-                'file' => $exception->getFile().':'.$exception->getLine(),
+                'file' => $exception->getFile() . ':' . $exception->getLine(),
                 'trace' => $this->formatTraceFragment(),
             ]
             : [
-                'type' => get_class($exception),
+                'type' => \get_class($exception),
                 'message' => $exception instanceof HttpException ? $exception->getMessage() : 'Internal Server Error',
             ];
     }
@@ -82,9 +82,9 @@ class JsonFormatter implements ExceptionFormatter
      */
     protected function formatTraceFragment()
     {
-        return array_map(function ($trace) {
+        return \array_map(function ($trace) {
             if (isset($trace['file']) && isset($trace['line'])) {
-                $trace['file'] = $trace['file'].':'.$trace['line'];
+                $trace['file'] = $trace['file'] . ':' . $trace['line'];
             }
 
             unset($trace['args'], $trace['line']);

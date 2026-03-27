@@ -11,43 +11,29 @@ class CorsMiddleware
 {
     /**
      * The container instance.
-     *
-     * @var \Swilen\Container\Container
      */
-    protected $container;
+    protected Container $container;
 
     /**
-     * Default headers list fro CORS.
-     *
-     * @var array<string,string[]|string|bool|int>
+     * Settings resolved from config file.
      */
-    protected $headers = [
-        'Access-Control-Allow-Origin' => '*',
-        'Access-Control-Allow-Headers' => 'X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization',
-        'Access-Control-Allow-Methods' => 'GET, HEAD, PUT, PATCH, POST, DELETE',
-        'Access-Control-Allow-Credentials' => true,
-        'Access-Control-Max-Age' => 86400,
-    ];
+    protected array $settings;
 
     /**
-     * Create new CorsMiddleware for all routes.
-     *
-     * @param \Swilen\Container\Container $container
-     *
-     * @return void
+     * Create new CorsMiddleware.
      */
     public function __construct(Container $container)
     {
         $this->container = $container;
+
+        $defaults = $this->getDefaultConfig();
+        $this->settings = $container->has('config')
+            ? $container->make('config')->get('cors', []) + $defaults
+            : $this->getDefaultConfig();
     }
 
     /**
-     * Handle incoming request for authenticate user.
-     *
-     * @param \Swilen\Http\Request $request
-     * @param \Closure             $next
-     *
-     * @return \Swilen\Http\Response
+     * Handle incoming request.
      */
     public function handle(Request $request, \Closure $next)
     {
@@ -59,70 +45,80 @@ class CorsMiddleware
             return $this->handlePreflightRequest($request);
         }
 
-        $response = $next($request);
-
-        return $this->handleCorsRequest($response);
+        return tap($next($request), function (Response $response) use ($request) {
+            $this->appendCorsHeaders($response, $request);
+        });
     }
 
     /**
-     * Determine if current request is a preflight.
-     *
-     * @param \Swilen\Http\Request $request
-     *
-     * @return bool
+     * Append CORS headers to the response.
      */
-    protected function isPreflightRequest(Request $request)
+    protected function appendCorsHeaders(Response $response, Request $request): void
     {
-        return $request->getMethod() === Method::OPTIONS &&
-            $request->headers->has('Access-Control-Request-Method');
+        $origin = $this->getValidOrigin($request);
+
+        $response->withHeaders([
+            'Access-Control-Allow-Origin' => $origin,
+            'Access-Control-Allow-Credentials' => $this->settings['allow_credentials'] ? 'true' : 'false',
+        ]);
+
+        if ($this->settings['exposed_headers']) {
+            $response->withHeaders([
+                'Access-Control-Expose-Headers' => \implode(', ', $this->settings['exposed_headers'])
+            ]);
+        }
     }
 
     /**
-     * Determine if current request is a preflight.
-     *
-     * @param \Swilen\Http\Request $request
-     *
-     * @return \Swilen\Http\Response
+     * Handle the OPTIONS preflight request.
      */
-    protected function handlePreflightRequest(Request $request)
+    protected function handlePreflightRequest(Request $request): Response
     {
         return new Response(null, 204, [
-            'Access-Control-Allow-Origin' => '*',
-            'Access-Control-Allow-Credentials' => true,
-            'Access-Control-Allow-Methods' => 'GET, HEAD, PUT, PATCH, POST, DELETE',
-            'Access-Control-Allow-Headers' => 'X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization',
-            'Access-Control-Max-Age' => 600,
+            'Access-Control-Allow-Origin' => $this->getValidOrigin($request),
+            'Access-Control-Allow-Methods' => \implode(', ', $this->settings['methods']),
+            'Access-Control-Allow-Headers' => \implode(', ', $this->settings['headers']),
+            'Access-Control-Allow-Credentials' => $this->settings['allow_credentials'] ? 'true' : 'false',
+            'Access-Control-Max-Age' => $this->settings['max_age'],
         ]);
     }
 
     /**
-     * Determine if the request has a Origin that should pass through the CORS flow.
-     *
-     * @param \Swilen\Http\Request $request
-     *
-     * @return bool
+     * Determine the Origin header value based on settings.
      */
-    protected function shouldRun(Request $request)
+    protected function getValidOrigin(Request $request): string
     {
-        if (!$request->headers->get('Origin', false)) {
-            return false;
+        $origin = $request->headers->get('Origin');
+
+        if (\in_array('*', $this->settings['origin'])) {
+            return '*';
         }
 
-        return true;
+        return \in_array($origin, $this->settings['origin']) ? $origin : 'null';
+    }
+
+    protected function isPreflightRequest(Request $request): bool
+    {
+        return $request->getMethod() === Method::OPTIONS && $request->headers->has('Access-Control-Request-Method');
+    }
+
+    protected function shouldRun(Request $request): bool
+    {
+        return $request->headers->has('Origin');
     }
 
     /**
-     * Handle cors request and append headers to response.
-     *
-     * @param \Swilen\Http\Response $response
-     *
-     * @return \Swilen\Http\Response
+     * Default configuration if none is provided.
      */
-    protected function handleCorsRequest(Response $response)
+    protected function getDefaultConfig(): array
     {
-        return $response->withHeaders([
-            'Access-Control-Allow-Origin' => '*',
-            'Access-Control-Allow-Credentials' => true,
-        ]);
+        return [
+            'origin' => ['*'],
+            'methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'],
+            'headers' => ['Content-Type', 'Authorization', 'X-Requested-With'],
+            'exposed_headers' => [],
+            'allow_credentials' => false,
+            'max_age' => 86400,
+        ];
     }
 }

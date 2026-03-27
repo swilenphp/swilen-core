@@ -35,7 +35,8 @@ it('Response helper is instaceof Routing\ResponsiFactory', function () {
     expectt(response()->file(new File(getReadableFileStub())))->toBeInstanceOf(BinaryFileResponse::class);
     expectt(response()->download(new File(getReadableFileStub())))->toBeInstanceOf(BinaryFileResponse::class);
     expectt(response()->json())->toBeInstanceOf(JsonResponse::class);
-    expectt(response()->stream(function () {}))->toBeInstanceOf(StreamedResponse::class);
+    expectt(response()->stream(function () {
+    }))->toBeInstanceOf(StreamedResponse::class);
 
     $app[ResponseFactory::class] = new stdClass();
 
@@ -117,7 +118,10 @@ it('Cannot redeclare helper functions', function () {
         }
     }
 
-    expectt(tap('Hola', function () {}))->not->toBeTrue();
+    expectt(tap('Hola', function () {
+    }))->not->toBeTrue();
 });
 
-class MakeClassAppHelperStub {}
+class MakeClassAppHelperStub
+{
+}

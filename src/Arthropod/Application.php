@@ -3,18 +3,24 @@
 namespace Swilen\Arthropod;
 
 use Swilen\Arthropod\Contract\ExceptionHandler;
-use Swilen\Arthropod\Events\AppBootedEvent;
+use Swilen\Arthropod\Contract\HttpKernel;
+use Swilen\Arthropod\Events\AppBootstrappingEvent;
+use Swilen\Arthropod\Exception\Handler;
 use Swilen\Cache\Cache;
 use Swilen\Container\Container;
+use Swilen\Events\Dispatcher;
 use Swilen\Events\EventDispatcher;
+use Swilen\Http\Events\MiddlewareEndEvent;
+use Swilen\Http\Events\MiddlewareStartEvent;
 use Swilen\Http\Request;
+use Swilen\Http\Response;
 use Swilen\Petiole\Facade;
+use Swilen\Petiole\ServiceProvider;
 use Swilen\Pipeline\Pipeline;
 use Swilen\Routing\RoutingServiceProvider;
 use Swilen\Shared\Arthropod\Application as ArthropodApplication;
-use Swilen\Shared\Arthropod\HttpApplication;
 
-class Application extends Container implements ArthropodApplication, HttpApplication
+class Application extends Container implements ArthropodApplication, HttpKernel
 {
     /**
      * The Swilen current version.
@@ -28,101 +34,79 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @var bool
      */
-    protected $hasBeenBootstrapped = false;
-
-    /**
-     * Indicates if the application has booted.
-     *
-     * @var bool
-     */
-    protected $booted = false;
+    protected bool $hasBeenBootstrapped = false;
 
     /**
      * The application middlewares.
      *
      * @var string[]
      */
-    protected $middlewares = [
+    protected array $middlewares = [
         \Swilen\Arthropod\Middleware\CorsMiddleware::class,
         \Swilen\Arthropod\Middleware\LoggerMiddleware::class,
     ];
 
     /**
-     * The bootable services collection.
+     * The boostrabable services collection.
      *
      * @var string[]
      */
-    protected $bootstrappers = [
-        \Swilen\Arthropod\Bootable\Facades::class,
+    protected array $bootstrappers = [
+        \Swilen\Arthropod\Bootstrap\EnvironmentVars::class,
+        \Swilen\Arthropod\Bootstrap\Configuration::class,
+        \Swilen\Arthropod\Bootstrap\ExceptionsHandler::class,
+        \Swilen\Arthropod\Bootstrap\Facades::class, // This should be before register providers to make facades available in providers.
+        \Swilen\Arthropod\Bootstrap\RegisterProviders::class,
     ];
 
     /**
-     * The initial bootable services collection.
+     * The service provider repository.
      *
-     * @var string[]
+     * @var \Swilen\Arthropod\ProviderRepository
      */
-    protected $initials = [
-        \Swilen\Arthropod\Bootable\EnvironmentVars::class,
-        \Swilen\Arthropod\Bootable\Configuration::class,
-        \Swilen\Arthropod\Bootable\ExceptionsHandler::class,
-        \Swilen\Arthropod\Bootable\Providers::class,
-    ];
-
-    /**
-     * Resolved service provider collection for boot.
-     *
-     * @var \Swilen\Petiole\ServiceProvider[]
-     */
-    protected $serviceProviders = [];
-
-    /**
-     * Collection of service providers as registered.
-     *
-     * @var array<string, bool>
-     */
-    protected $serviceProvidersRegistered = [];
+    protected ProviderRepository $providerRepository;
 
     /**
      * The application base path.
      *
      * @var string
      */
-    protected $basePath;
+    protected string $basePath;
 
     /**
      * The application app path.
      *
      * @var string
      */
-    protected $appPath = 'app';
+    protected string $appPath = 'app';
 
     /**
      * The application config path.
      *
      * @var string
      */
-    protected $configPath;
+    protected string $configPath;
 
     /**
      * The application base uri.
      *
      * @var string
      */
-    protected $appUri;
+    protected string $appUri;
 
     /**
      * The application environment path.
      *
      * @var string
      */
-    protected $environmentPath;
+    protected string $environmentPath;
 
     /**
      * The application environment file.
      *
      * @var string
      */
-    protected $environmentFile;
+    protected string $environmentFile;
 
     /**
      * The application events.
@@ -130,6 +114,20 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      * @var \Swilen\Events\EventDispatcher
      */
     public readonly EventDispatcher $events;
+
+    /**
+     * The server factory callback.
+     *
+     * @var \Closure(): void|null
+     */
+    protected ?\Closure $serverFactory = null;
+
+    /**
+     * Indicates if the server is currently listening.
+     *
+     * @var bool
+     */
+    protected bool $isListening = false;
 
     /**
      * Create http aplication instance.
@@ -142,21 +140,30 @@ class Application extends Container implements ArthropodApplication, HttpApplica
     {
         $this->defineBasePath($path);
         $this->registerBaseBindings();
-        $this->registerServiceProviders();
         $this->registerCoreContainerAliases();
+        $this->registerBaseServiceProviders();
 
         $this->events = new EventDispatcher($this);
+        $this->instance(EventDispatcher::class, $this->events);
+        $this->alias(EventDispatcher::class, Dispatcher::class);
+
+        $this->singleton(ExceptionHandler::class, Handler::class);
     }
 
     /**
-     * Setups initials services
+     * Start the application server (Swoole).
+     * This is the entry point for handling HTTP requests.
      */
-    public function setup()
+    public function listen(): void
     {
-        $this->bootstrapInitials();
+        if ($this->serverFactory !== null) {
+            if ($this->isListening) {
+                throw new \RuntimeException('Server is already listening.');
+            }
 
-        $this->singleton(EventDispatcher::class, EventDispatcher::class);
-        $this->singleton(Cache::class, Cache::class);
+            ($this->serverFactory)();
+            $this->isListening = true;
+        }
     }
 
     /**
@@ -180,6 +187,8 @@ class Application extends Container implements ArthropodApplication, HttpApplica
 
         $this->instance('app', $this);
         $this->instance(Container::class, $this);
+        $this->instance(ProviderRepository::class, new ProviderRepository($this));
+        $this->providerRepository = $this->make(ProviderRepository::class);
     }
 
     /**
@@ -187,9 +196,9 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @return void
      */
-    private function registerServiceProviders()
+    private function registerBaseServiceProviders()
     {
-        $this->register(new RoutingServiceProvider($this));
+        $this->providerRepository->register(new RoutingServiceProvider($this));
     }
 
     /**
@@ -201,7 +210,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     private function defineBasePath($basePath)
     {
-        $this->basePath = rtrim($basePath, '\/');
+        $this->basePath = \rtrim($basePath, '\/');
 
         $this->registerApplicationPaths();
 
@@ -406,90 +415,41 @@ class Application extends Container implements ArthropodApplication, HttpApplica
     }
 
     /**
+     * Use custom server factory callback. only (Swoole) server runtime is supported for now.
+     *
+     * @param \Closure(): void $factory
+     *
+     * @return $this
+     */
+    public function useServerFactory(\Closure $factory)
+    {
+        $this->serverFactory = $factory;
+
+        return $this;
+    }
+
+    /**
      * Register all of the configured providers.
      *
      * @return void
      */
-    public function registerProviders()
+    public function registerProviders(): void
     {
-        $repository = new ProviderRepository($this);
+        $this->providerRepository->push($this->make('config')->get('providers', []));
 
-        $repository->load($this->make('config')->get('providers', []));
+        $this->providerRepository->load();
     }
 
     /**
      * Initial register service providers.
      *
-     * @param \Swilen\Petiole\ServiceProvider $provider
-     *
-     * @return \Swilen\Petiole\ServiceProvider
-     */
-    public function register($provider)
-    {
-        if ($this->hasProviderBeenRegistered($provider)) {
-            return;
-        }
-
-        $provider = $this->createServiceProvider($provider);
-
-        $provider->register();
-
-        $this->markProviderAsRegistered($provider);
-
-        return $provider;
-    }
-
-    /**
-     * Normalize if provider is string for create new instance.
-     *
      * @param \Swilen\Petiole\ServiceProvider|string $provider
      *
-     * @return \Swilen\Petiole\ServiceProvider
+     * @return \Swilen\Petiole\ServiceProvider|null
      */
-    protected function createServiceProvider($provider)
+    public function register($provider): ?ServiceProvider
     {
-        return is_string($provider) ? new $provider($this) : $provider;
-    }
-
-    /**
-     * Mark service provider as registered.
-     *
-     * @param \Swilen\Petiole\ServiceProvider $provider
-     *
-     * @return void
-     */
-    protected function markProviderAsRegistered($provider)
-    {
-        $this->serviceProviders[] = $provider;
-
-        $this->serviceProvidersRegistered[get_class($provider)] = true;
-    }
-
-    /**
-     * Determine if service provider as been registered.
-     *
-     * @param \Swilen\Petiole\ServiceProvider|string $provider
-     *
-     * @return bool
-     */
-    protected function hasProviderBeenRegistered($provider)
-    {
-        $provider = is_object($provider) ? get_class($provider) : $provider;
-
-        return isset($this->serviceProvidersRegistered[$provider])
-            && $this->serviceProvidersRegistered[$provider] === true;
-    }
-
-    /**
-     * Bootstrap the application with packages that implement the bootstrap contract.
-     *
-     * @return void
-     */
-    protected function bootstrapInitials()
-    {
-        foreach ($this->initials as $bootstrap) {
-            $this->make($bootstrap)->bootstrap($this);
-        }
+        return $this->providerRepository->register($provider);
     }
 
     /**
@@ -497,18 +457,19 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @return void
      */
-    protected function bootstrap()
+    public function bootstrap(): void
     {
         if ($this->hasBeenBootstrapped()) {
             return;
         }
 
+        $this->events->dispatch(new AppBootstrappingEvent());
         foreach ($this->bootstrappers as $bootstrap) {
             $this->make($bootstrap)->bootstrap($this);
         }
 
         $this->hasBeenBootstrapped = true;
-        $this->events->dispatch(new AppBootedEvent());
+        // $this->events->dispatch(new AppBootingEvent());
     }
 
     /**
@@ -516,7 +477,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @return bool
      */
-    public function hasBeenBootstrapped()
+    public function hasBeenBootstrapped(): bool
     {
         return $this->hasBeenBootstrapped === true;
     }
@@ -524,21 +485,13 @@ class Application extends Container implements ArthropodApplication, HttpApplica
     /**
      * Boot application with boot method into service containers.
      *
+     * Its is defer method, it will be called when the first request is handled.
+     *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
-        if ($this->isBooted()) {
-            return;
-        }
-
-        foreach ($this->serviceProviders as $provider) {
-            if (method_exists($provider, 'boot')) {
-                $this->call([$provider, 'boot']);
-            }
-        }
-
-        $this->booted = true;
+        $this->providerRepository->boot();
     }
 
     /**
@@ -546,9 +499,9 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @return bool
      */
-    public function isBooted()
+    public function isBooted(): bool
     {
-        return $this->booted === true;
+        return $this->providerRepository->isBooted();
     }
 
     /**
@@ -556,7 +509,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @return bool
      */
-    public function isDevelopmentMode()
+    public function isDevelopmentMode(): bool
     {
         return (bool) $this->has('env') && $this->make('env') === 'development';
     }
@@ -566,9 +519,9 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @return bool
      */
-    public function isDebugMode()
+    public function isDebugMode(): bool
     {
-        return (bool) $this->make('config')->get('app.debug', true);
+        return (bool) $this->has('config') && $this->make('config')->get('app.debug', true);
     }
 
     /**
@@ -578,10 +531,10 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @return \Swilen\Http\Response
      */
-    public function handle(Request $request)
+    public function handle(Request $request): Response
     {
         try {
-            $this->bootstrap();
+            $this->providerRepository->boot();
 
             $response = $this->dispatchRequestThroughRouter($request);
         } catch (\Throwable $e) {
@@ -602,17 +555,22 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      */
     protected function dispatchRequestThroughRouter(Request $request)
     {
-        // Set request instance for use in facades and function helpers
         $this->instance('request', $request);
 
         Facade::flushFacadeInstance('request');
 
-        return (new Pipeline($this))
+        $this->events->dispatch(new MiddlewareStartEvent($request));
+
+        $response = (new Pipeline($this))
             ->from($request)
             ->through($this->middlewares)
             ->then(function ($request) {
                 return $this['router']->dispatch($request);
             });
+
+        $this->events->dispatch(new MiddlewareEndEvent($request, $response));
+
+        return $response;
     }
 
     /**
@@ -622,7 +580,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @return \Swilen\Http\Response
      */
-    protected function renderException(\Throwable $e)
+    public function renderException(\Throwable $e)
     {
         return $this->make(ExceptionHandler::class)->render($e);
     }
@@ -634,7 +592,7 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @return void
      */
-    protected function reportException(\Throwable $e)
+    public function reportException(\Throwable $e)
     {
         $this->make(ExceptionHandler::class)->report($e);
     }
@@ -665,10 +623,9 @@ class Application extends Container implements ArthropodApplication, HttpApplica
      *
      * @return void
      */
-    public function flush()
+    public function flush(): void
     {
-        $this->serviceProviders           = [];
-        $this->serviceProvidersRegistered = [];
+        $this->providerRepository->flush();
 
         parent::flush();
     }

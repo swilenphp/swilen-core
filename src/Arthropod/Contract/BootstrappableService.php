@@ -4,7 +4,7 @@ namespace Swilen\Arthropod\Contract;
 
 use Swilen\Shared\Arthropod\Application;
 
-interface BootableService
+interface BootstrappableService
 {
     /**
      * Bootstrap this service.

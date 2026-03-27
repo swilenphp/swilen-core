@@ -51,7 +51,8 @@ class Handler implements ExceptionHandler
         $this->app = $app;
 
         $this->logger = new Logger(
-            $app->storagePath('logs'), new \DateTimeZone($app->make('config')->get('app.timezone', 'UTC'))
+            $app->storagePath('logs'),
+            new \DateTimeZone($app->make('config')->get('app.timezone', 'UTC'))
         );
     }
 
@@ -120,11 +121,9 @@ class Handler implements ExceptionHandler
      */
     protected function isSkippableReport(\Throwable $e)
     {
-        $skippables = array_merge($this->skipReport, $this->internalSkipReport);
+        $skippables = [...$this->skipReport, ...$this->internalSkipReport];
 
-        return !empty(array_filter($skippables, function ($skip) use ($e) {
-            return $e instanceof $skip;
-        }));
+        return !empty(\array_filter($skippables, fn($skip) => $e instanceof $skip));
     }
 
     /**

@@ -2,6 +2,6 @@
 
 namespace Swilen\Arthropod\Events;
 
-final class AppBootedEvent
+final class AppBootingEvent
 {
 }
