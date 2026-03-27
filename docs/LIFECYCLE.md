@@ -6,8 +6,6 @@ Prefix: `Swilen\Arthropod\Events\`
 * `AppBootingEvent`
 * `AppBootedEvent`
 
-👉 These are **framework-level**, not tied to Swoole.
-
 ---
 
 ## 🔵 Server Events (Daemon)
@@ -20,8 +18,6 @@ Prefix: `Swilen\Arthropod\Events\`
 * `ServerReloadingEvent`
 * `ServerShuttingDownEvent`
 * `ServerStoppedEvent`
-
-👉 These represent the **Swoole daemon lifecycle**
 
 ---
 
@@ -241,7 +237,7 @@ AppBootstrappingEvent
 
 ---
 
-# 📊 Mermaid Diagram
+# 📊 Diagram
 
 Here’s a **full lifecycle diagram** you can drop into docs:
 
