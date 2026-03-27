@@ -3,7 +3,6 @@
 namespace Swilen\Arthropod\Runtime;
 
 use OpenSwoole\Coroutine;
-use Psr\Http\Message\RequestInterface;
 use Swilen\Http\Request;
 use Throwable;
 
@@ -39,7 +38,7 @@ use Throwable;
  *   });
  *```
  * Direct access to the current coroutine context:
- * 
+ *
  *```
  *   $user = RequestContext::get('user');
  *   RequestContext::set('foo', 'bar');

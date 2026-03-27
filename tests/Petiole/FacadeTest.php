@@ -20,7 +20,7 @@ afterAll(function () {
 
 it('Facade implemetacion', function () {
     $this->app->bind('test-facade', function () {
-        return new class {
+        return new class () {
             public function retrieve(int $number)
             {
                 return $number;

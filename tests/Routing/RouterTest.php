@@ -1,6 +1,7 @@
 <?php
 
 use Swilen\Container\Container;
+use Swilen\Events\EventDispatcher;
 use Swilen\Http\Exception\HttpForbiddenException;
 use Swilen\Http\Exception\HttpMethodNotAllowedException;
 use Swilen\Http\Exception\HttpNotFoundException;
@@ -15,7 +16,12 @@ uses()->group('Routing');
 
 beforeEach(function () {
     $this->container = new Container();
-    $this->router    = new Router($this->container);
+    $this->events = new EventDispatcher($this->container);
+    $this->router = new Router($this->events, $this->container);
+});
+
+afterEach(function () {
+    unset($this->container, $this->events, $this->router);
 });
 
 it('Match route current request', function () {
@@ -130,7 +136,7 @@ it('Shared route attributes registered', function () {
 });
 
 it('Route created with given http method by router method', function () {
-    $router  = new Router();
+    $router = new Router(new EventDispatcher(), new Container());
     $handler = function () {
         return 5;
     };
@@ -148,7 +154,7 @@ it('Route created with given http method by router method', function () {
 });
 
 it('Get all routes as RouteCollection instance from a router', function () {
-    $router  = new Router();
+    $router = new Router(new EventDispatcher(), new Container());
     $handler = function () {
         return 5;
     };

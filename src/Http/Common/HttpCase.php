@@ -27,7 +27,9 @@ class HttpCase
     private static function normalize(string $str, string|array $delimiters): string
     {
         $len = strlen($str);
-        if ($len === 0) return '';
+        if ($len === 0) {
+            return '';
+        }
 
         $upper = true;
 

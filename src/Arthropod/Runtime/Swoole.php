@@ -38,7 +38,7 @@ class Swoole implements RuntimeContract
 
     /**
      * The Swoole HTTP server instance.
-     * 
+     *
      * @var Server
      * @readonly
      */
@@ -46,7 +46,7 @@ class Swoole implements RuntimeContract
 
     /**
      * The application container instance.
-     * 
+     *
      * @var \Swilen\Container\Container
      * @readonly
      */
@@ -54,7 +54,7 @@ class Swoole implements RuntimeContract
 
     /**
      * Event dispatcher for server events.
-     * 
+     *
      * @var \Swilen\Events\Dispatcher
      */
     protected Dispatcher $events;

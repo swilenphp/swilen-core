@@ -2,7 +2,7 @@
 
 namespace Swilen\Http;
 
-use Swilen\Http\Common\Http;
+use Swilen\Http\Common\HttpStatus;
 use Swilen\Http\Common\Method;
 use Swilen\Http\Common\SupportResponse;
 use Swilen\Http\Component\ResponseHeaderHunt;
@@ -16,42 +16,42 @@ class Response extends SupportResponse implements ResponseContract
      *
      * @var \Swilen\Http\Component\ResponseHeaderHunt
      */
-    public $headers;
+    public readonly ResponseHeaderHunt $headers;
 
     /**
      * The parsed body as string or resource for put into client.
      *
      * @var string|null
      */
-    protected $body;
+    protected ?string $body;
 
     /**
      * The http version for the response.
      *
      * @var string
      */
-    protected $version;
+    protected string $version;
 
     /**
      * The status code for the response.
      *
      * @var int
      */
-    protected $statusCode;
+    protected int $statusCode;
 
     /**
      * The status text for the response.
      *
      * @var string
      */
-    protected $statusText;
+    protected string $statusText;
 
     /**
      * The charset encoding for the response.
      *
      * @var string
      */
-    protected $charset = 'utf-8';
+    protected string $charset = 'utf-8';
 
     /**
      * Create new response instance.
@@ -292,7 +292,7 @@ class Response extends SupportResponse implements ResponseContract
      */
     final public function isEmpty()
     {
-        return in_array($this->statusCode, [204, 205, 304], true);
+        return \in_array($this->statusCode, [204, 205, 304], true);
     }
 
     /**
@@ -302,7 +302,7 @@ class Response extends SupportResponse implements ResponseContract
      */
     final public function setNotModified()
     {
-        $this->setStatusCode(304);
+        $this->setStatusCode(HttpStatus::NOT_MODIFIED->value);
         $this->setBody(null);
 
         // Remove headers that MUST NOT be included with 304 Not Modified responses
@@ -421,7 +421,7 @@ class Response extends SupportResponse implements ResponseContract
      *
      * @return void
      */
-    final public function setStatusCode(int $code, string $text = null)
+    final public function setStatusCode(int $code, ?string $text = null)
     {
         $this->statusCode = $code;
 

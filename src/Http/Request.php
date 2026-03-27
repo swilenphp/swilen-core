@@ -5,6 +5,7 @@ namespace Swilen\Http;
 use Swilen\Http\Common\HttpCase;
 use Swilen\Http\Common\Method;
 use Swilen\Http\Common\SupportRequest;
+use Swilen\Http\Component\CookieJar;
 use Swilen\Http\Component\FileHunt;
 use Swilen\Http\Component\HeaderHunt;
 use Swilen\Http\Component\InputHunt;
@@ -20,35 +21,42 @@ class Request extends SupportRequest implements \ArrayAccess
      *
      * @var \Swilen\Http\Component\HeaderHunt
      */
-    public $headers;
+    public readonly HeaderHunt $headers;
 
     /**
      * Http server variables collections.
      *
      * @var \Swilen\Http\Component\ServerHunt
      */
-    public $server;
+    public readonly ServerHunt $server;
 
     /**
      * Http files collections.
      *
      * @var \Swilen\Http\Component\FileHunt
      */
-    public $files;
+    public readonly FileHunt $files;
 
     /**
      * Http params collections via $_POST.
      *
      * @var \Swilen\Http\Component\InputHunt
      */
-    public $request;
+    public readonly InputHunt $request;
 
     /**
      * Http params collections via $_GET.
      *
      * @var \Swilen\Http\Component\InputHunt
      */
-    public $query;
+    public readonly InputHunt $query;
+
+    /**
+     * Http cookies collection
+     *
+     * @var \Swilen\Http\Component\CookieJar
+     */
+    public readonly CookieJar $cookies;
 
     /**
      * The content of request body decoded as json.
@@ -69,7 +77,7 @@ class Request extends SupportRequest implements \ArrayAccess
      *
      * @var string
      */
-    protected $method;
+    protected ?string $method = null;
 
     /**
      * Current http request uri.
@@ -90,7 +98,7 @@ class Request extends SupportRequest implements \ArrayAccess
      *
      * @var string[]
      */
-    protected $acceptMethodOverrides = ['DELETE', 'PUT'];
+    protected array $acceptMethodOverrides = ['DELETE', 'PUT'];
 
     /**
      * Http current user logged prvided by token.
@@ -111,13 +119,14 @@ class Request extends SupportRequest implements \ArrayAccess
      *
      * @return void
      */
-    public function __construct(array $server = [], array $files = [], array $request = [], array $query = [], $body = null)
+    public function __construct(array $server = [], array $headers = [], array $files = [], array $request = [], array $query = [], $body = null)
     {
         $this->server  = new ServerHunt($server);
-        $this->headers = new HeaderHunt($this->server->headers());
+        $this->headers = new HeaderHunt($headers);
         $this->files   = new FileHunt($files);
         $this->request = new InputHunt($request);
         $this->query   = new InputHunt($query);
+        $this->cookies = new CookieJar($this->headers->get('Set-Cookie', []));
 
         $this->body = $body;
     }
@@ -137,9 +146,9 @@ class Request extends SupportRequest implements \ArrayAccess
      *
      * @return static
      */
-    public static function captureFromContext(array $server = [], array $files = [], array $request = [], array $query = [], $body = null)
+    public static function captureFromContext(array $server = [], array $headers = [], array $files = [], array $request = [], array $query = [], $body = null)
     {
-        return new static($server, $files, $request, $query, $body);
+        return new static($server, $headers, $files, $request, $query, $body);
     }
 
     /**
@@ -149,7 +158,7 @@ class Request extends SupportRequest implements \ArrayAccess
      */
     public static function createFromGlobals()
     {
-        $request = new static($_SERVER, $_FILES, $_POST, $_GET);
+        $request = new static($_SERVER, ServerHunt::headers($_SERVER), $_FILES, $_POST, $_GET);
 
         if (
             mb_strpos($request->headers->get('Content-Type', ''), 'application/x-www-form-urlencoded') === 0 &&

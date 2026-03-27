@@ -2,7 +2,6 @@
 
 namespace Swilen\Routing;
 
-use Swilen\Http\Common\Http;
 use Swilen\Http\Common\Method;
 use Swilen\Http\Exception\HttpMethodNotAllowedException;
 use Swilen\Http\Exception\HttpNotFoundException;
@@ -191,6 +190,75 @@ class RouteCollection implements Arrayable, \IteratorAggregate, \Countable
     protected function methodNotAllowed(string $method, array $methods = [])
     {
         throw HttpMethodNotAllowedException::forMethod($method, $methods);
+    }
+
+    /**
+     * Compile all routes in collection to be ready for matching.
+     *
+     * @return array<{static: \Swilen\Routing\Route[], blocks: string[], map: array<int, array{method: string, handler: \Closure|string, vars: string[], middleware: array}>}>
+     */
+    public function compile(): array
+    {
+        $static = [];
+        $dynamic = [];
+        $metadata = [];
+
+        foreach ($this->routes as $method => $routes) {
+            foreach ($routes as $route) {
+                $pattern = $route->getPattern();
+
+                if (strpos($pattern, '{') === false) {
+                    $static[$method][$pattern] = [
+                        'handler' => $route->getAction('uses'),
+                        'middleware' => $route->getMiddleware()
+                    ];
+                    continue;
+                }
+
+                $dynamic[] = $route;
+            }
+        }
+
+        usort($dynamic, function ($a, $b) {
+            return strlen($b->getPattern()) <=> strlen($a->getPattern());
+        });
+
+        $chunks = array_chunk($dynamic, 100);
+        $blocks = [];
+
+        foreach ($chunks as $chunkIndex => $chunk) {
+            $patterns = [];
+            foreach ($chunk as $localIndex => $route) {
+                $globalId = ($chunkIndex * 100) + $localIndex;
+
+                $compiled = RouteMatching::compile($route->getPattern());
+
+                $patterns[] = $compiled['regex'] . "(*MARK:$globalId)";
+
+                $metadata[$globalId] = [
+                    'method' => $route->getMethod(),
+                    'handler' => $route->getAction('uses'),
+                    'vars' => $compiled['vars'],
+                    'middleware' => $route->getMiddleware()
+                ];
+            }
+            $blocks[] = '~^(?|' . implode('|', $patterns) . ')$~x';
+        }
+        return [
+            'static' => $static,
+            'blocks' => $blocks,
+            'map'    => $metadata
+        ];
+    }
+
+    /**
+     * Get all the routes in the collection.
+     *
+     * @return array<string, \Swilen\Routing\Route[]>
+     */
+    public function routes()
+    {
+        return $this->routes;
     }
 
     /**

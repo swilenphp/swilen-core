@@ -1,16 +1,17 @@
 <?php
 
-use Swilen\Http\Common\Http;
+use Swilen\Http\Common\HttpStatus;
 use Swilen\Http\Request;
 use Swilen\Http\Response\StreamedResponse;
 
 uses()->group('Http', 'Response');
 
 it('Espect \Response instance created succesfully and is instance of \Swilen\Http\Response\StreamedResponse', function () {
-    $response = new StreamedResponse(function () {});
+    $response = new StreamedResponse(function () {
+    });
     expectt($response)->toBeObject();
     expectt($response)->toBeInstanceOf(StreamedResponse::class);
-    expectt($response->getStatusCode())->toBe(Http::OK);
+    expectt($response->getStatusCode())->toBe(HttpStatus::OK->value);
     expectt($response->getBody())->toBeNull();
 });
 

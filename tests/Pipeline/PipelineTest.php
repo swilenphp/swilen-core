@@ -1,8 +1,8 @@
 <?php
 
 use Swilen\Container\Container;
-use Swilen\Pipeline\Pipeline;
 use Swilen\Pipeline\FilterPipeline;
+use Swilen\Pipeline\Pipeline;
 
 uses()->group('Pipeline');
 
@@ -229,7 +229,7 @@ it('apply filter with class method string callback', function () {
 });
 
 it('apply filter with array callback', function () {
-    $obj = new class {
+    $obj = new class () {
         public function modify($value)
         {
             return $value . '-obj';

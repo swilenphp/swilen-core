@@ -14,7 +14,7 @@ enum Method: string
     case TRACE = 'TRACE';
     case CONNECT = 'CONNECT';
 
-        // WebDAV
+    // WebDAV
     case PROPFIND = 'PROPFIND';
     case PROPPATCH = 'PROPPATCH';
     case MKCOL = 'MKCOL';
@@ -23,14 +23,14 @@ enum Method: string
     case LOCK = 'LOCK';
     case UNLOCK = 'UNLOCK';
 
-        // WebDAV extensions
+    // WebDAV extensions
     case REPORT = 'REPORT';
     case MKACTIVITY = 'MKACTIVITY';
     case CHECKOUT = 'CHECKOUT';
     case MERGE = 'MERGE';
     case SEARCH = 'SEARCH';
 
-        // Others
+    // Others
     case PURGE = 'PURGE';
     case LINK = 'LINK';
     case UNLINK = 'UNLINK';

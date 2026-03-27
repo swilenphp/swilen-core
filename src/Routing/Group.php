@@ -22,7 +22,8 @@ final class Group
         ]);
 
         return array_merge_recursive(Arr::except(
-            $old, ['prefix', 'where']
+            $old,
+            ['prefix', 'where']
         ), $new);
     }
 

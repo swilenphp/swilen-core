@@ -2,7 +2,7 @@
 
 namespace Swilen\Routing;
 
-use Swilen\Http\Common\Http;
+use Swilen\Http\Common\HttpStatus;
 use Swilen\Http\Response;
 use Swilen\Http\Response\BinaryFileResponse;
 use Swilen\Http\Response\JsonResponse;
@@ -22,7 +22,7 @@ final class ResponseFactory implements ContractResponseFactory
     /**
      * {@inheritdoc}
      */
-    public function status(int $status = Http::OK, array $headers = [])
+    public function status(int $status = HttpStatus::OK->value, array $headers = [])
     {
         return $this->send(null, $status, $headers);
     }

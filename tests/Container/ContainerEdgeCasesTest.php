@@ -21,13 +21,13 @@ it('Add contextual binding for concrete type', function () {
     );
 
     $consumer = $this->container->make(ContextualConsumerStub::class);
-    
+
     expectt($consumer->dependency)->toBeInstanceOf(ContextualDependencyB::class);
 });
 
 it('Contextual binding overrides default binding', function () {
     $this->container->bind(ContextualDependencyInterface::class, ContextualDependencyA::class);
-    
+
     $this->container->addContextualBinding(
         ContextualConsumerStub::class,
         ContextualDependencyInterface::class,
@@ -35,7 +35,7 @@ it('Contextual binding overrides default binding', function () {
     );
 
     $consumer = $this->container->make(ContextualConsumerStub::class);
-    
+
     expectt($consumer->dependency)->toBeInstanceOf(ContextualDependencyB::class);
 });
 
@@ -43,7 +43,7 @@ it('Use default binding when no contextual binding exists', function () {
     $this->container->bind(ContextualDependencyInterface::class, ContextualDependencyA::class);
 
     $consumer = $this->container->make(ContextualConsumerStub::class);
-    
+
     expectt($consumer->dependency)->toBeInstanceOf(ContextualDependencyA::class);
 });
 
@@ -51,7 +51,7 @@ it('Call method with dependencies injected', function () {
     $service = new MethodInjectionStub();
 
     $result = $this->container->callMethod($service, 'process', ['name' => 'test']);
-    
+
     expectt($result)->toBe('processed: test');
 });
 
@@ -59,7 +59,7 @@ it('Call method with default parameters', function () {
     $service = new MethodInjectionStub();
 
     $result = $this->container->callMethod($service, 'process');
-    
+
     expectt($result)->toBe('processed: default');
 });
 
@@ -68,26 +68,26 @@ it('Call closure with dependencies injected', function () {
         return $dep->value . ': ' . $name;
     };
 
-    $this->container->bind(MethodInjectionDependency::class, fn() => new MethodInjectionDependency('injected'));
+    $this->container->bind(MethodInjectionDependency::class, fn () => new MethodInjectionDependency('injected'));
 
     $result = $this->container->call($closure);
-    
+
     expectt($result)->toBe('injected: closure');
 });
 
 it('Call function with dependencies injected', function () {
     $this->container->instance('test-value', 'from-container');
-    
+
     $result = $this->container->call(function (MethodInjectionDependency $dep, $testValue = 'default') {
         return $dep->value . ' - ' . $testValue;
     });
-    
+
     expectt($result)->toBe('dependency-value - default');
 });
 
 it('Resolve deeply nested dependencies', function () {
     $instance = $this->container->make(NestedLevel1::class);
-    
+
     expectt($instance)->toBeInstanceOf(NestedLevel1::class);
     expectt($instance->level2)->toBeInstanceOf(NestedLevel2::class);
     expectt($instance->level2->level3)->toBeInstanceOf(NestedLevel3::class);
@@ -108,7 +108,7 @@ it('Resolve callback bound via bindMethod', function () {
     });
 
     $result = $this->container->callMethodBinding(MethodBindingService::class . '@handle', $service);
-    
+
     expectt($result)->toBe('default-custom');
 });
 
@@ -116,13 +116,13 @@ it('Return original method when no binding exists', function () {
     $service = new MethodBindingService();
 
     $result = $this->container->callMethodBinding(MethodBindingService::class . '@handle', $service);
-    
+
     expectt($result)->toBe('default');
 });
 
 it('Extend singleton after resolution', function () {
     $this->container->singleton(ExtensibleService::class);
-    
+
     $instance1 = $this->container->make(ExtensibleService::class);
     $instance1->value = 'original';
 
@@ -132,20 +132,20 @@ it('Extend singleton after resolution', function () {
     });
 
     $instance2 = $this->container->make(ExtensibleService::class);
-    
+
     expectt($instance2->value)->toBe('extended');
 });
 
 it('Extend non-singleton applies extenders to new instance', function () {
     $this->container->bind(ExtensibleService::class);
-    
+
     $this->container->extend(ExtensibleService::class, function ($service, $app) {
         $service->extended = true;
         return $service;
     });
 
     $instance = $this->container->make(ExtensibleService::class);
-    
+
     expectt($instance)->toHaveProperty('extended');
     expectt($instance->extended)->toBeTrue();
 });
@@ -155,51 +155,51 @@ it('Null key throws exception on offsetSet', function () {
 })->throws(\Exception::class, 'Unable to set key is null');
 
 it('Retrieve binding with array access', function () {
-    $this->container->bind('test', fn() => 'bound-value');
+    $this->container->bind('test', fn () => 'bound-value');
 
     expectt($this->container['test'])->toBe('bound-value');
 });
 
 it('Unset removes binding', function () {
     $this->container['test'] = 'value';
-    
+
     expectt(isset($this->container['test']))->toBeTrue();
-    
+
     unset($this->container['test']);
-    
+
     expectt(isset($this->container['test']))->toBeFalse();
 });
 
 it('Chained alias resolution', function () {
     $this->container->alias(OriginalClass::class, 'alias1');
     $this->container->alias('alias1', 'alias2');
-    
-    $this->container->bind(OriginalClass::class, fn() => new OriginalClass());
+
+    $this->container->bind(OriginalClass::class, fn () => new OriginalClass());
 
     expectt($this->container->make('alias2'))->toBeInstanceOf(OriginalClass::class);
 });
 
 it('Forget instance removes resolved instance but keeps binding', function () {
-    $this->container->bind('service', fn() => new stdClass());
-    
+    $this->container->bind('service', fn () => new stdClass());
+
     $instance1 = $this->container->make('service');
-    
+
     $this->container->forgetInstance('service');
-    
+
     expectt($this->container->resolved('service'))->toBeFalse();
     expectt($this->container->has('service'))->toBeTrue();
 });
 
 it('Resolve optional class dependency', function () {
     $instance = $this->container->make(OptionalDependencyClass::class);
-    
+
     expectt($instance)->toBeInstanceOf(OptionalDependencyClass::class);
     expectt($instance->optional)->toBeNull();
 });
 
 it('Resolve variadic parameter creates instances', function () {
     $instance = $this->container->make(VariadicOptional::class);
-    
+
     expectt($instance->items)->toBeArray();
     expectt(count($instance->items))->toBe(1);
 });
@@ -208,60 +208,60 @@ it('Bind with class name as abstract and concrete', function () {
     $this->container->bind(ConcreteOnlyStub::class);
 
     expectt($this->container->has(ConcreteOnlyStub::class))->toBeTrue();
-    
+
     $instance = $this->container->make(ConcreteOnlyStub::class);
     expectt($instance)->toBeInstanceOf(ConcreteOnlyStub::class);
 });
 
 it('Unbind removes binding completely', function () {
-    $this->container->bind('to-unbind', fn() => 'value');
-    
+    $this->container->bind('to-unbind', fn () => 'value');
+
     expectt($this->container->has('to-unbind'))->toBeTrue();
-    
+
     $this->container->unbind('to-unbind');
-    
+
     expectt($this->container->has('to-unbind'))->toBeFalse();
 });
 
 it('IsShared returns true for singleton', function () {
-    $this->container->singleton('singleton-service', fn() => new stdClass());
-    
+    $this->container->singleton('singleton-service', fn () => new stdClass());
+
     expectt($this->container->isShared('singleton-service'))->toBeTrue();
 });
 
 it('IsShared returns false for regular binding', function () {
-    $this->container->bind('regular-service', fn() => new stdClass());
-    
+    $this->container->bind('regular-service', fn () => new stdClass());
+
     expectt($this->container->isShared('regular-service'))->toBeFalse();
 });
 
 it('Resolved returns true after making instance', function () {
-    $this->container->bind('test-resolved', fn() => 'value');
-    
+    $this->container->bind('test-resolved', fn () => 'value');
+
     expectt($this->container->resolved('test-resolved'))->toBeFalse();
-    
+
     $this->container->make('test-resolved');
-    
+
     expectt($this->container->resolved('test-resolved'))->toBeTrue();
 });
 
 it('Instance is already resolved', function () {
     $this->container->instance('pre-resolved', new stdClass());
-    
+
     expectt($this->container->resolved('pre-resolved'))->toBeTrue();
 });
 
 it('Tag multiple items with same tag', function () {
     $this->container->tag([TagStubA::class, TagStubB::class], 'multi-tag');
-    
+
     expectt($this->container->isTag('multi-tag'))->toBeTrue();
-    
+
     $tagged = $this->container->tagged('multi-tag');
     $count = 0;
     foreach ($tagged as $item) {
         $count++;
     }
-    
+
     expectt($count)->toBe(2);
 });
 

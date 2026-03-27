@@ -1,6 +1,6 @@
 <?php
 
-use Swilen\Http\Common\Http;
+use Swilen\Http\Common\HttpStatus;
 use Swilen\Http\Request;
 use Swilen\Http\Response\JsonResponse;
 
@@ -10,7 +10,7 @@ it('Espect \Response instance created succesfully and is instance of \Swilen\Htt
     $response = new JsonResponse();
     expectt($response)->toBeObject();
     expectt($response)->toBeInstanceOf(JsonResponse::class);
-    expectt($response->getStatusCode())->toBe(Http::OK);
+    expectt($response->getStatusCode())->toBe(HttpStatus::OK->value);
 });
 
 it('Expect JsonResponse() send content as json', function () {
@@ -19,7 +19,7 @@ it('Expect JsonResponse() send content as json', function () {
         return (new JsonResponse(['hello' => 'World']))->prepare(Request::make(''))->terminate();
     });
     expectt($response->headers->get('Content-Type'))->toMatch('/^application\/json+/');
-    expectt($response->getStatusCode())->toBe(Http::OK);
+    expectt($response->getStatusCode())->toBe(HttpStatus::OK->value);
     expectt($response->getBody())->toBeJson();
     expectt($content)->toBe('{"hello":"World"}');
 });

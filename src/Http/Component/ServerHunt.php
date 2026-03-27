@@ -11,7 +11,7 @@ final class ServerHunt extends ParameterHunt
      *
      * @return array<string, string>
      */
-    public function headers()
+    public static function headers(array $params = []): array
     {
         $headers    = [];
         $additional = [
@@ -20,7 +20,7 @@ final class ServerHunt extends ParameterHunt
             'CONTENT_MD5' => true,
         ];
 
-        foreach ($this->params as $key => $value) {
+        foreach ($params as $key => $value) {
             if (strpos($key, 'HTTP_') === 0) {
                 $headers[HttpCase::toNormalizeHttp($key)] = $value;
             }
@@ -31,8 +31,8 @@ final class ServerHunt extends ParameterHunt
             }
         }
 
-        if (function_exists('apache_request_headers')) {
-            $apacheRequestHeaders = apache_request_headers();
+        if (\function_exists('apache_request_headers')) {
+            $apacheRequestHeaders = \apache_request_headers();
             foreach ($apacheRequestHeaders as $key => $value) {
                 $key = HttpCase::toNormalize($key);
                 if (!isset($headers[$key])) {
@@ -43,12 +43,12 @@ final class ServerHunt extends ParameterHunt
 
         $authorization = null;
 
-        if (isset($this->params['Authorization'])) {
-            $authorization = $this->params['Authorization'];
-        } elseif (isset($this->params['HTTP_AUTHORIZATION'])) {
-            $authorization = $this->params['HTTP_AUTHORIZATION'];
-        } elseif (isset($this->params['REDIRECT_HTTP_AUTHORIZATION'])) {
-            $authorization = $this->params['REDIRECT_HTTP_AUTHORIZATION'];
+        if (isset($params['Authorization'])) {
+            $authorization = $params['Authorization'];
+        } elseif (isset($params['HTTP_AUTHORIZATION'])) {
+            $authorization = $params['HTTP_AUTHORIZATION'];
+        } elseif (isset($params['REDIRECT_HTTP_AUTHORIZATION'])) {
+            $authorization = $params['REDIRECT_HTTP_AUTHORIZATION'];
         }
 
         if ($authorization !== null) {

@@ -1,6 +1,6 @@
 <?php
 
-use Swilen\Http\Common\Http;
+use Swilen\Http\Common\HttpStatus;
 use Swilen\Http\Common\Method;
 use Swilen\Http\Request;
 use Swilen\Http\Response;
@@ -11,16 +11,16 @@ it('Espect \Response instance created succesfully and is instance of \Swilen\Htt
     $response = new Response();
     expectt($response)->toBeObject();
     expectt($response)->toBeInstanceOf(Response::class);
-    expectt($response->getStatusCode())->toBe(Http::OK);
+    expectt($response->getStatusCode())->toBe(HttpStatus::OK->value);
     expectt($response->getBody())->toBeNull();
 });
 
 it('Response with empty content', function () {
-    $response = new Response('testing', Http::NO_CONTENT);
+    $response = new Response('testing', HttpStatus::NO_CONTENT->value);
     $prepared = $response->prepare(Request::make('/'));
 
     expectt($prepared->getBody())->toBeNull();
-    expectt($prepared->getStatusCode())->toBe(Http::NO_CONTENT);
+    expectt($prepared->getStatusCode())->toBe(HttpStatus::NO_CONTENT->value);
     expectt($prepared->isEmpty())->toBeTrue();
 
     $response = new Response('content-ignored');
@@ -56,11 +56,11 @@ it('Work with status codes', function () {
     expectt($response->isInformational())->toBeTrue();
     expectt($response->isOk())->toBeFalse();
 
-    $response = $response->withStatus(Http::NO_CONTENT);
+    $response = $response->withStatus(HttpStatus::NO_CONTENT->value);
     expectt($response->isEmpty())->toBeTrue();
     expectt($response->isOk())->toBeFalse();
 
-    $response = $response->withStatus(Http::MOVED_PERMANENTLY);
+    $response = $response->withStatus(HttpStatus::MOVED_PERMANENTLY->value);
     expectt($response->isRedirection())->toBeTrue();
     expectt($response->isOk())->toBeFalse();
 
@@ -68,11 +68,11 @@ it('Work with status codes', function () {
     expectt($response->isClientError())->toBeTrue();
     expectt($response->isOk())->toBeFalse();
 
-    $response = $response->withStatus(Http::NOT_FOUND);
+    $response = $response->withStatus(HttpStatus::NOT_FOUND->value);
     expectt($response->isNotFound())->toBeTrue();
     expectt($response->isClientError())->toBeTrue();
 
-    $response = $response->withStatus(500);
+    $response = $response->withStatus(HttpStatus::INTERNAL_SERVER_ERROR->value);
     expectt($response->isServerError())->toBeTrue();
     expectt($response->isClientError())->toBeFalse();
     expectt($response->isOk())->toBeFalse();

@@ -2,7 +2,7 @@
 
 namespace Swilen\Http\Common;
 
-class SupportResponse implements Http
+class SupportResponse
 {
     /**
      * Status codes translation table.

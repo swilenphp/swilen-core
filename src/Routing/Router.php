@@ -3,12 +3,22 @@
 namespace Swilen\Routing;
 
 use Swilen\Container\Container;
-use Swilen\Http\Common\Http;
+use Swilen\Events\EventDispatcher;
+use Swilen\Http\Common\HttpStatus;
+use Swilen\Http\Events\ControllerDispatchEvent;
+use Swilen\Http\Events\ControllerHandledEvent;
+use Swilen\Http\Events\RequestMatchedEvent;
+use Swilen\Http\Events\ResponseCreatedEvent;
+use Swilen\Http\Exception\HttpMethodNotAllowedException;
+use Swilen\Http\Exception\HttpNotFoundException;
 use Swilen\Http\Request;
 use Swilen\Http\Response;
 use Swilen\Http\Response\JsonResponse;
 use Swilen\Pipeline\Pipeline;
+use Swilen\Routing\Compiler\DataGenerator;
 use Swilen\Routing\Contract\RouterContract;
+use Swilen\Routing\Dispatcher\FastRouteDispatcher;
+use Swilen\Routing\Exception\RoutingException;
 use Swilen\Shared\Support\Arr;
 use Swilen\Shared\Support\Json;
 use Swilen\Shared\Support\Stringable;
@@ -20,21 +30,28 @@ class Router implements RouterContract
      *
      * @var \Swilen\Container\Container
      */
-    private $container;
+    private readonly Container $container;
 
     /**
      * Collection of routes.
      *
      * @var \Swilen\Routing\RouteCollection
      */
-    protected $routes;
+    protected readonly RouteCollection $routes;
 
     /**
      * Current Route matched.
      *
      * @var \Swilen\Routing\Route|null
      */
-    protected $current;
+    protected ?Route $current;
+
+    /**
+     * The event dispatcher instance.
+     *
+     * @var \Swilen\Events\EventDispatcher
+     */
+    protected readonly EventDispatcher $events;
 
     /**
      * Http request instance.
@@ -75,17 +92,27 @@ class Router implements RouterContract
     public const HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
 
     /**
+     * FastRoute dispatcher instance mapped from cache or compiled on the fly.
+     *
+     * @var \Swilen\Routing\Dispatcher\FastRouteDispatcher|null
+     */
+    protected ?FastRouteDispatcher $compiledDispatcher = null;
+
+    /**
      * Create new Router instance.
      *
+     * @param \Swilen\Events\EventDispatcher $events
      * @param \Swilen\Container\Container|null $container
      *
      * @return void
      */
-    public function __construct($container = null)
+    public function __construct(EventDispatcher $events, ?Container $container = null)
     {
         $this->container = $container ?: new Container();
-        $this->routes    = new RouteCollection();
+        $this->routes = new RouteCollection();
+        $this->events = $events;
     }
+
 
     /**
      * Register a new GET route with the router.
@@ -321,6 +348,52 @@ class Router implements RouterContract
     }
 
     /**
+     * Write compiled routes to file for fast dispatching.
+     *
+     * @param string $path
+     *
+     * @return void
+     */
+    public function compileToFile(string $path): void
+    {
+        $generator = new DataGenerator();
+
+        foreach ($this->routes() as $methodRoutes) {
+            foreach ($methodRoutes as $route) {
+                $generator->addRoute($route);
+            }
+        }
+
+        $code = '<?php return ' . var_export($generator->generate(), true) . ';' . PHP_EOL;
+
+        file_put_contents($path, $code);
+    }
+
+    /**
+     * Load routes from cache for fast dispatching.
+     *
+     * @param string $path
+     *
+     * @return void
+     *
+     * @throws \Swilen\Routing\Exception\RoutingException
+     */
+    public function loadCompiled(string $path): void
+    {
+        if (!is_file($path)) {
+            throw RoutingException::forMissingCacheFile($path);
+        }
+
+        $data = require $path;
+
+        if (!is_array($data)) {
+            throw RoutingException::forInvalidCacheFile($path);
+        }
+
+        $this->compiledDispatcher = new FastRouteDispatcher($data);
+    }
+
+    /**
      * Handle incoming request and dispatch to route.
      *
      * @param \Swilen\Http\Request $request
@@ -330,26 +403,98 @@ class Router implements RouterContract
     public function dispatch(Request $request)
     {
         $this->request = $request;
+        $this->current = $route = $this->findRoute($request);
 
-        return $this->dispatchToRoute($request);
+        $this->events->dispatch(new RequestMatchedEvent($request, $route));
+
+        return $this->dispatchToRoute($request, $route);
+    }
+
+    /**
+     * Resolves the route from the dispatcher.
+     *
+     * @param \Swilen\Http\Request $request
+     *
+     * @return \Swilen\Routing\Route
+     *
+     * @throws \Swilen\Http\Exception\HttpNotFoundException
+     * @throws \Swilen\Http\Exception\HttpMethodNotAllowedException
+     */
+    protected function findRoute(Request $request): Route
+    {
+        if ($this->compiledDispatcher === null) {
+            $generator = new DataGenerator();
+
+            foreach ($this->routes as $methodRoutes) {
+                foreach ($methodRoutes as $route) {
+                    $generator->addRoute($route);
+                }
+            }
+
+            $this->compiledDispatcher = new FastRouteDispatcher($generator->generate());
+        }
+
+        $result = $this->compiledDispatcher->dispatch($request->getMethod(), $request->getPathInfo());
+
+        if ($result->isNotFound()) {
+            throw new HttpNotFoundException();
+        }
+
+        if ($result->isMethodNotAllowed()) {
+            throw HttpMethodNotAllowedException::forMethod($request->getMethod(), $result->allowedMethods);
+        }
+
+        // Try to find the original registered route object to preserve its state/references (for tests/etc)
+        $route = null;
+        $pattern = $result->pattern ?? $request->getPathInfo();
+
+        foreach ($this->routes->routes()[$request->getMethod()] ?? [] as $r) {
+            if ($r->getPattern() === $pattern) {
+                $route = $r;
+                break;
+            }
+        }
+
+        if ($route === null) {
+            $route = new Route($request->getMethod(), $pattern, $result->handler);
+            $route->use($result->middleware);
+            if ($result->name) {
+                $route->name($result->name);
+            }
+        }
+
+        $route->setParameters($result->parameters)
+              ->setContainer($this->container)
+              ->setRouter($this);
+
+        return $route;
     }
 
     /**
      * Send the current request to the route that matches the action.
      *
      * @param \Swilen\Http\Request $request
+     * @param \Swilen\Routing\Route $route
      *
      * @return \Swilen\Http\Response
      */
-    protected function dispatchToRoute(Request $request)
+    protected function dispatchToRoute(Request $request, Route $route)
     {
-        $this->current = $route = $this->routes->match($request);
-
         return (new Pipeline($this->container))
             ->from($request)
             ->through($route->middlewares() ?? [])
             ->then(function ($request) use ($route) {
-                return $this->prepareResponse($request, $route->run());
+                $controllerResponse = $route->run();
+
+                $this->events->dispatch(new ControllerDispatchEvent($request, $route->getAction('uses')));
+
+                $response = tap($this->prepareResponse($request, $controllerResponse), function ($response) use ($request) {
+                    $this->events->dispatch(new ResponseCreatedEvent($request, $response));
+                });
+
+                $this->events->dispatch(new ControllerHandledEvent($request, $response));
+
+                return $response;
             });
     }
 
@@ -375,7 +520,7 @@ class Router implements RouterContract
             $response = new Response($response);
         }
 
-        if ($response->getStatusCode() === Http::NOT_MODIFIED) {
+        if ($response->getStatusCode() === HttpStatus::NOT_MODIFIED->value) {
             $response->setNotModified();
         }
 

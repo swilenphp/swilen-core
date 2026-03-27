@@ -1,6 +1,6 @@
 <?php
 
-use Swilen\Http\Common\Http;
+use Swilen\Http\Common\HttpStatus;
 use Swilen\Http\Response;
 use Swilen\Http\Response\BinaryFileResponse;
 use Swilen\Http\Response\JsonResponse;
@@ -13,11 +13,12 @@ it('Response Factory return correspond instance for the method', function () {
     $factory = new ResponseFactory();
 
     expectt($factory->send(''))->toBeInstanceOf(Response::class);
-    expectt($factory->status(Http::OK))->toBeInstanceOf(Response::class);
+    expectt($factory->status(HttpStatus::OK->value))->toBeInstanceOf(Response::class);
     expectt($factory->json(''))->toBeInstanceOf(JsonResponse::class);
     expectt($factory->file(getReadableFileStub()))->toBeInstanceOf(BinaryFileResponse::class);
     expectt($factory->download(getReadableFileStub()))->toBeInstanceOf(BinaryFileResponse::class);
-    expectt($factory->stream(function () {}))->toBeInstanceOf(StreamedResponse::class);
+    expectt($factory->stream(function () {
+    }))->toBeInstanceOf(StreamedResponse::class);
 
     $binary = new ResponseFactory();
     $filename = 'testing.txt';

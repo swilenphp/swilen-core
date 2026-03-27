@@ -2,7 +2,7 @@
 
 namespace Swilen\Routing\Contract;
 
-use Swilen\Http\Common\Http;
+use Swilen\Http\Common\HttpStatus;
 
 interface ResponseFactory
 {
@@ -25,7 +25,7 @@ interface ResponseFactory
      *
      * @return \Swilen\Http\Response\Response
      */
-    public function status(int $status = Http::OK, array $headers = []);
+    public function status(int $status = HttpStatus::OK->value, array $headers = []);
 
     /**
      * Send a JSON response (with the correct content-type).

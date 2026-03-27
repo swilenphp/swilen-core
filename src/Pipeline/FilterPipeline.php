@@ -4,7 +4,6 @@ namespace Swilen\Pipeline;
 
 use Swilen\Container\Container;
 
-
 class FilterPipeline
 {
     /**
@@ -51,10 +50,10 @@ class FilterPipeline
     public function add(string $name, mixed $callback, int $priority = 10): self
     {
         $this->filters[$name][$priority][] = $callback;
-        
+
         // Invalidate cache for this hook since a new listener was added
         unset($this->sorted[$name]);
-        
+
         return $this;
     }
 
@@ -64,7 +63,7 @@ class FilterPipeline
      * @param string $name  The name of the filter hook.
      * @param mixed  $value The initial value to be transformed.
      * @param mixed  ...$args Additional context arguments (read-only for filters).
-     * 
+     *
      * @return mixed The final transformed value.
      */
     public function apply(string $name, mixed $value, ...$args): mixed
@@ -89,7 +88,7 @@ class FilterPipeline
      * @param mixed $callback
      * @param mixed $value
      * @param array $args
-     * 
+     *
      * @return mixed
      */
     protected function dispatch(mixed $callback, mixed $value, array $args): mixed
@@ -102,7 +101,7 @@ class FilterPipeline
         // Case 2: String resolution (e.g., 'App\Filters\Sanitize@handle')
         if (is_string($callback)) {
             [$class, $method] = $this->parseCallback($callback);
-            
+
             $instance = $this->container->make($class);
             return $instance->{$method}($value, ...$args);
         }
@@ -117,9 +116,9 @@ class FilterPipeline
 
     /**
      * Get the sorted list of filters for a given hook.
-     * 
+     *
      * @param string $name
-     * 
+     *
      * @return array
      */
     protected function getSortedFilters(string $name): array
@@ -144,7 +143,9 @@ class FilterPipeline
      */
     public function forget(string $name, mixed $callback = null, int $priority = 10): void
     {
-        if (!isset($this->filters[$name])) return;
+        if (!isset($this->filters[$name])) {
+            return;
+        }
 
         unset($this->sorted[$name]);
 
@@ -155,8 +156,8 @@ class FilterPipeline
 
         if (isset($this->filters[$name][$priority])) {
             $this->filters[$name][$priority] = array_filter(
-                $this->filters[$name][$priority], 
-                fn($item) => $item !== $callback
+                $this->filters[$name][$priority],
+                fn ($item) => $item !== $callback
             );
         }
     }

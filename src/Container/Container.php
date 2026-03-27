@@ -76,14 +76,14 @@ class Container implements \ArrayAccess, ContainerContract
          *
          * @var array<string, bool>
          */
-        protected array $buildStack = [];
+    protected array $buildStack = [];
 
-        /**
-         * The build stack for contextual binding resolution (ordered).
-         *
-         * @var array<string>
-         */
-        protected array $buildStackOrder = [];
+    /**
+     * The build stack for contextual binding resolution (ordered).
+     *
+     * @var array<string>
+     */
+    protected array $buildStackOrder = [];
 
     /**
      * The parameter override stack.
@@ -632,7 +632,7 @@ class Container implements \ArrayAccess, ContainerContract
     protected function findInContextualBindings($abstract): \Closure|string|null
     {
         $current = end($this->buildStackOrder);
-        
+
         return $this->contextual[$current][$abstract] ?? null;
     }
 
@@ -855,7 +855,7 @@ class Container implements \ArrayAccess, ContainerContract
             }
         }
 
-        return array_map(fn($abstract) => $this->resolve($abstract), $concrete);
+        return array_map(fn ($abstract) => $this->resolve($abstract), $concrete);
     }
 
     /**

@@ -88,7 +88,7 @@ it('Decode json request Content-Type has json', function () {
     /**
      * @var \Mockery\MockInterface|\Mockery\LegacyMockInterface|Request $request
      */
-    $request = Mockery::mock(Request::class, [[], [], [], [], '{"test": true}']);
+    $request = Mockery::mock(Request::class, [[], [], [], [], [], '{"test": true}']);
     $request = $request->makePartial();
 
     $request->shouldReceive('isJsonRequest')
@@ -229,13 +229,13 @@ it('Set user to request instance', function () {
 it('Read content is stream or resource', function () {
     $file = fopen(getReadableFileStub(), 'rb');
 
-    $request = new Request([], [], [], [], $file);
+    $request = new Request([], [], [], [], [], $file);
 
     expectt(trim($request->getBody()))->toBe('test');
 });
 
 it('Get file from request', function () {
-    $request = new Request([], [
+    $request = new Request([], [], [
         'test-file' => [
             'name' => 'File.txt',
             'type' => 'plain/txt',

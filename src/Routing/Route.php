@@ -224,11 +224,15 @@ class Route implements Arrayable, JsonSerializable
      */
     private function compilePatternMatching()
     {
-        if ($this->matching !== null) {
+        if ($this->matching !== null && $this->parameterNames !== null) {
             return $this->matching;
         }
 
-        return $this->matching = RouteMatching::compile($this->pattern);
+        $compiled = RouteMatching::compile($this->pattern);
+        $this->matching = $compiled['regex'];
+        $this->parameterNames = $compiled['vars'];
+
+        return $this->matching;
     }
 
     /**
@@ -260,12 +264,18 @@ class Route implements Arrayable, JsonSerializable
      */
     private function matchToKeys(array $params = [])
     {
-        foreach ($params as $key => $value) {
-            if (is_numeric($key) || $value === null) {
+        $paramNames = $this->parameterNames();
+
+        foreach ($params as $index => $value) {
+            // Skip null values
+            if ($value === null) {
                 continue;
             }
 
-            $this->parameters[$key] = $value;
+            $paramName = $paramNames[$index] ?? null;
+            if ($paramName !== null) {
+                $this->parameters[$paramName] = $value;
+            }
         }
     }
 
@@ -341,6 +351,20 @@ class Route implements Arrayable, JsonSerializable
     }
 
     /**
+     * Set the parameters for the route.
+     *
+     * @param array $parameters
+     *
+     * @return $this
+     */
+    public function setParameters(array $parameters): self
+    {
+        $this->parameters = $parameters;
+
+        return $this;
+    }
+
+    /**
      * Get the method of route.
      *
      * @return string
@@ -375,7 +399,7 @@ class Route implements Arrayable, JsonSerializable
      *
      * @return mixed
      */
-    public function getAction(string $key = null)
+    public function getAction(?string $key = null)
     {
         return $key ? $this->action[$key] : $this->action;
     }

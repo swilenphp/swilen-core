@@ -132,7 +132,7 @@ class HeaderHunt implements \Countable, \IteratorAggregate
      * @param string     $key
      * @param mixed|null $default
      *
-     * @return string|null
+     * @return string|string[]|null
      */
     public function get(string $key, $default = null)
     {

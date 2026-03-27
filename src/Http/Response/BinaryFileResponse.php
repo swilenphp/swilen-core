@@ -2,7 +2,7 @@
 
 namespace Swilen\Http\Response;
 
-use Swilen\Http\Common\Http;
+use Swilen\Http\Common\HttpStatus;
 use Swilen\Http\Common\Method;
 use Swilen\Http\Component\File\File;
 use Swilen\Http\Component\ResponseHeaderHunt;
@@ -174,13 +174,13 @@ class BinaryFileResponse extends Response
                     if ($start <= $end) {
                         $end = min($end, $fileSize - 1);
                         if ($start < 0 || $start > $end) {
-                            $this->setStatusCode(Http::REQUESTED_RANGE_NOT_SATISFIABLE);
+                            $this->setStatusCode(HttpStatus::REQUESTED_RANGE_NOT_SATISFIABLE->value);
                             $this->headers->set('Content-Range', sprintf('bytes */%s', $fileSize));
                         } elseif ($end - $start < $fileSize - 1) {
                             $this->maxlen = $end < $fileSize ? $end - $start + 1 : -1;
                             $this->offset = $start;
 
-                            $this->setStatusCode(Http::PARTIAL_CONTENT);
+                            $this->setStatusCode(HttpStatus::PARTIAL_CONTENT->value);
                             $this->headers->set('Content-Range', sprintf('bytes %s-%s/%s', $start, $end, $fileSize));
                             $this->headers->set('Content-Length', $end - $start + 1);
                         }

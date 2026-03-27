@@ -86,7 +86,9 @@ class Client
         }
 
         $curlHeaders = [];
-        foreach ($headers as $k => $v) $curlHeaders[] = "$k: $v";
+        foreach ($headers as $k => $v) {
+            $curlHeaders[] = "$k: $v";
+        }
 
         curl_setopt_array($ch, [
             CURLOPT_URL => $url,
@@ -132,7 +134,9 @@ class Client
         $client->setHeaders($headers);
         $client->set(['timeout' => $options['timeout']]);
 
-        if ($options['body']) $client->setData($options['body']);
+        if ($options['body']) {
+            $client->setData($options['body']);
+        }
 
         $path = ($parsed['path'] ?? '/') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
         $client->execute($path);

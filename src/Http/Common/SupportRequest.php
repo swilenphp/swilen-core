@@ -2,6 +2,8 @@
 
 namespace Swilen\Http\Common;
 
+use Swilen\Http\Component\ServerHunt;
+
 class SupportRequest
 {
     /**
@@ -20,7 +22,7 @@ class SupportRequest
     {
         [$server, $files, $request, $query, $body] = self::createServerRequest($uri, $method, $parameters, $files, $server);
 
-        return new static($server, $files, $request, $query, $body);
+        return new static($server, ServerHunt::headers($server), $files, $request, $query, $body);
     }
 
     /**
@@ -43,12 +45,12 @@ class SupportRequest
 
         if (isset($components['host'])) {
             $server['SERVER_NAME'] = $components['host'];
-            $server['HTTP_HOST']   = $components['host'];
+            $server['HTTP_HOST'] = $components['host'];
         }
 
         if (isset($components['scheme'])) {
             if ($components['scheme'] === 'https') {
-                $server['HTTPS']       = 'on';
+                $server['HTTPS'] = 'on';
                 $server['SERVER_PORT'] = 443;
             } else {
                 unset($server['HTTPS']);
@@ -83,11 +85,11 @@ class SupportRequest
                 // no break
             case 'PATCH':
                 $request = $parameters;
-                $query   = [];
+                $query = [];
                 break;
             default:
                 $request = [];
-                $query   = $parameters;
+                $query = $parameters;
                 break;
         }
 
@@ -96,17 +98,17 @@ class SupportRequest
             parse_str(html_entity_decode($components['query']), $qs);
 
             if ($query) {
-                $query       = array_replace($qs, $query);
+                $query = array_replace($qs, $query);
                 $queryString = http_build_query($query, '', '&');
             } else {
-                $query       = $qs;
+                $query = $qs;
                 $queryString = $components['query'];
             }
         } elseif ($query) {
             $queryString = http_build_query($query, '', '&');
         }
 
-        $server['REQUEST_URI']  = $components['path'] . ($queryString !== '' ? '?' . $queryString : '');
+        $server['REQUEST_URI'] = $components['path'] . ($queryString !== '' ? '?' . $queryString : '');
         $server['QUERY_STRING'] = $queryString;
 
         return [$server, $files, $request, $query, $body];

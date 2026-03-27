@@ -6,7 +6,6 @@ use Swilen\Arthropod\Contract\ExceptionHandler;
 use Swilen\Arthropod\Contract\HttpKernel;
 use Swilen\Arthropod\Events\AppBootstrappingEvent;
 use Swilen\Arthropod\Exception\Handler;
-use Swilen\Cache\Cache;
 use Swilen\Container\Container;
 use Swilen\Events\Dispatcher;
 use Swilen\Events\EventDispatcher;

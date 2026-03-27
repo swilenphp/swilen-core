@@ -11,25 +11,18 @@ namespace Swilen\Routing;
 class RouteRegister
 {
     /**
-     * The router instance for route register.
-     *
-     * @var \Swilen\Routing\Router
-     */
-    protected $router;
-
-    /**
      * The attributes to pass on to the router.
      *
      * @var array<string, mixed>
      */
-    protected $attributes = [];
+    protected array $attributes = [];
 
     /**
      * The attributes that can be set through this class.
      *
      * @var string[]
      */
-    protected $allowedAttributes = [
+    protected array $allowedAttributes = [
         'as',
         'middleware',
         'use',
@@ -44,9 +37,8 @@ class RouteRegister
      *
      * @return void
      */
-    public function __construct(Router $router)
+    public function __construct(protected readonly Router $router)
     {
-        $this->router = $router;
     }
 
     /**
@@ -59,7 +51,7 @@ class RouteRegister
      *
      * @throws \InvalidArgumentException
      */
-    public function attribute($key, $value)
+    public function attribute(string $key, mixed $value)
     {
         if (!in_array($key, $this->allowedAttributes)) {
             throw new \InvalidArgumentException("Attribute [{$key}] does not exist.");
@@ -106,7 +98,7 @@ class RouteRegister
      *
      * @throws \BadMethodCallException
      */
-    public function __call($method, $params)
+    public function __call(string $method, array $params)
     {
         if (in_array($method, $this->allowedAttributes)) {
             return $this->attribute($method, key_exists(0, $params) ? $params[0] : true);

@@ -123,7 +123,7 @@ class Handler implements ExceptionHandler
     {
         $skippables = [...$this->skipReport, ...$this->internalSkipReport];
 
-        return !empty(\array_filter($skippables, fn($skip) => $e instanceof $skip));
+        return !empty(\array_filter($skippables, fn ($skip) => $e instanceof $skip));
     }
 
     /**

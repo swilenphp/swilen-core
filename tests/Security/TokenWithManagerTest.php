@@ -12,26 +12,21 @@ uses()->group('Security', 'Token');
 
 define('APP_MANAGER_SECRET', 'jwt6350d205f2b4385ngfuftg');
 
-beforeAll(function () {
-    $container = Container::getInstance();
-
-    $container->singleton(JwtService::class, function ($app) {
+beforeEach(function () {
+    $this->container = Container::getInstance();
+    $this->container->singleton(JwtService::class, function ($app) {
         return Jwt::register(APP_MANAGER_SECRET, [
             'expires' => '60s',
             'algorithm' => 'HS512',
         ]);
     });
 
-    Facade::setFacadeApplication($container);
+    Facade::setFacadeApplication($this->container);
 });
 
-beforeEach(function () {
-    $this->container = Container::getInstance();
-});
-
-afterAll(function () {
-    Container::getInstance()->flush();
+afterEach(function () {
     Facade::flushFacadeInstances();
+    unset($this->container);
 });
 
 it('Create new token instance from token manager as singleton', function () {

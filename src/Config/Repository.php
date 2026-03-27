@@ -12,7 +12,7 @@ class Repository implements \ArrayAccess, ConfigRepository
      *
      * @var array
      */
-    private $items = [];
+    private array $items = [];
 
     /**
      * Create a new configuration repository.

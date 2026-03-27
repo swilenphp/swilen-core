@@ -65,7 +65,7 @@ function getMockedPDO()
         ->getMock();
 
     $db->method('prepare')->willReturn($query);
-    $db->method('lastInsertId')->willReturn("1");
+    $db->method('lastInsertId')->willReturn('1');
 
     return function () use ($db) {
         return $db;

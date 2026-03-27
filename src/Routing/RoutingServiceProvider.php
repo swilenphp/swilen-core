@@ -2,6 +2,7 @@
 
 namespace Swilen\Routing;
 
+use Swilen\Events\EventDispatcher;
 use Swilen\Http\Contract\ResponseContract;
 use Swilen\Http\Response;
 use Swilen\Petiole\ServiceProvider;
@@ -30,7 +31,7 @@ class RoutingServiceProvider extends ServiceProvider
     protected function registerRouter()
     {
         $this->app->singleton('router', function ($app) {
-            return new Router($app);
+            return new Router($app->make(EventDispatcher::class), $app);
         });
     }
 
